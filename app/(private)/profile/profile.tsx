@@ -39,7 +39,7 @@ const ProfileCard = ({ session }: any) => {
       );
       if (response.ok) {
         const responseData = await response.json();
-        console.warn('🚀 ~ getModule ~ data:', responseData.data);
+        // console.warn('🚀 ~ getModule ~ data:', responseData.data);
         // setTotalPage(() => pageCount);
         setUser(() => responseData.data);
         setIsLoading(false);
@@ -248,6 +248,18 @@ const ProfileCard = ({ session }: any) => {
                     <span className="text-sm font-medium leading-none text-muted-foreground">
                       {' '}
                       {user.nid_no || "N/A"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mb-4 flex flex-col gap-2">
+                  <p>
+                    <span className="text-sm font-medium leading-none">
+                      Module Name :
+                    </span>
+                    <span className="text-sm font-medium leading-none text-muted-foreground">
+                      {' '}
+                      {user.module_name || "N/A"}
                     </span>
                   </p>
                 </div>
