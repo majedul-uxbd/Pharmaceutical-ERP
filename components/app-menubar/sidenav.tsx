@@ -2,9 +2,11 @@
 
 import {
   BriefcaseBusiness,
+  ChevronRight,
   LayoutDashboard,
   MenuIcon,
   Presentation,
+  Settings2,
   Speech,
   Users2Icon,
 } from "lucide-react";
@@ -22,6 +24,9 @@ import { SidebarFooter } from "../ui/sidebar";
 import { NavUser } from "./nav-user";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { ModuleInfo } from "@/utilities/module.enum";
 
 interface SidebarPageProps {
   session: any;
@@ -100,129 +105,91 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
               <MenuIcon className="ml-2 size-6" />
             </MenuItem>
 
-            {["system_admin", "exhibitor_admin", "exhibitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/dashboard" />}
-                className={cn(isActiveRoute("/dashboard") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <LayoutDashboard className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Dashboard
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Dashboard
-              </MenuItem>
-            )}
+            {(session?.module_id === ModuleInfo[1].value) && (
+              <>
+                {/* Dashboard Menu Item */}
+                <MenuItem
+                  component={<Link href="/sim-module" />}
+                  className={cn(isActiveRoute("/sim-module") && "bg-slate-100")}
+                  icon={
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <LayoutDashboard className="size-5" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          align="center"
+                          className="ml-8 text-black bg-white border p-2"
+                        >
+                          DashBoard
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  }
+                >
+                  DashBoard
+                </MenuItem>
 
-            {["system_admin", "exhibitor_admin", "exhibitor", "visitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/exhibition" />}
-                className={cn(isActiveRoute("/exhibition") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Presentation className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Exhibitions
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Exhibitions
-              </MenuItem>
-            )}
+                {/* Setup Dropdown (Styled as MenuItem) */}
+                <DropdownMenu >
+                  <DropdownMenuTrigger asChild>
+                    <MenuItem
+                      component={<Link href="/sim-module" />}
+                      // className={cn(isActiveRoute("/sim-module") && "bg-slate-100 cursor-pointer")}
+                      className="cursor-pointer"
+                      icon={
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Settings2 className="size-5" />
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="right"
+                              align="center"
+                              className="ml-4 text-black bg-white border p-2"
+                            >
+                              Setup
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      }
+                    >
+                      <div className="flex w-full justify-between items-center">
+                        <span>Setup</span>
+                        <ChevronRight className="size-4 text-muted-foreground" />
+                      </div>
+                    </MenuItem>
+                  </DropdownMenuTrigger>
 
-            {["system_admin", "exhibitor_admin", "exhibitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/exhibitors" />}
-                className={cn(isActiveRoute("/exhibitors") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Users2Icon className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Exhibitors
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Exhibitors
-              </MenuItem>
-            )}
+                  {/* Dropdown Menu Content (Properly Positioned) */}
+                  <DropdownMenuContent
+                    className="w-56 bg-white border shadow-md rounded-md overflow-hidden"
+                    align="start"
+                    side="right" // Opens from the right side
+                  >
+                    <DropdownMenuItem asChild>
+                      <Link href="/volunteer">👥 View Volunteers</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/volunteer/register">📝 Register Volunteer</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/volunteer/reports">📊 Volunteer Reports</Link>
+                    </DropdownMenuItem>
 
-            {["system_admin"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/company" />}
-                className={cn(isActiveRoute("/company") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <BriefcaseBusiness className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Company
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Company
-              </MenuItem>
-            )}
+                    <div className="border-t my-1" />
 
-            {["system_admin"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/volunteer" />}
-                className={cn(isActiveRoute("/volunteer") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Speech className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Volunteers
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Volunteers
-              </MenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/profile">⚙️ Profile Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/security">🔒 Security</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+              </>
             )}
           </Menu>
 
