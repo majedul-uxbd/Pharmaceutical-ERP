@@ -63,7 +63,7 @@ const ProfileCard = ({ session }: any) => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <div className="flex w-full flex-col justify-between">
         <div className='shadow-slate-100" flex w-full flex-col items-center justify-start rounded-md border border-opacity-20 md:flex-row'>
           <div className="m-5 flex items-center justify-start">
