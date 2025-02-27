@@ -7,10 +7,10 @@ import { toast } from "sonner";
 interface DeactivateDepartmentProps {
     id: number;
     accessToken: string;
-    onInactiveSuccess: () => void;
+    onActiveSuccess: () => void;
 }
 
-const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: DeactivateDepartmentProps) => {
+const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepartmentProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -18,7 +18,7 @@ const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: Deactivate
         setButtonDisable(true);
         setIsOpen(false);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/inactive`,
+            `${process.env.NEXT_PUBLIC_API_URL}/department/active`,
             {
                 method: 'POST',
                 headers: {
@@ -31,11 +31,8 @@ const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: Deactivate
 
         const responseData = await response.json();
         if (responseData.status === 'success') {
-            toast.success(responseData?.message, {
-                style: { backgroundColor: "white", color: "black" },
-            });
-
-            onInactiveSuccess();
+            toast.success(responseData?.message);
+            onActiveSuccess();
             setIsOpen(true)
         } else {
             setIsOpen(false)
@@ -52,17 +49,17 @@ const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: Deactivate
                     onClick={() => setIsOpen(true)}
                     className="flex w-full justify-start items-center"
                 >
-                    <Trash2 className="text-red-700 font-bold" size={18} />
-                    <span>Inactive</span>
+                    <Trash2 className="text-green-600 font-bold" size={18} />
+                    <span>Active</span>
                 </Button>
             </DialogTrigger>
 
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-semibold">Confirm Inactivation</DialogTitle>
+                    <DialogTitle className="text-lg font-semibold">Confirm Activation</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    Are you sure you want to inactive this Department?
+                    Are you sure you want to active this Department?
                 </DialogDescription>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsOpen(false)}>
@@ -79,4 +76,4 @@ const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: Deactivate
 }
 
 
-export default DeactivateDepartment;
+export default ActivateDepartment;

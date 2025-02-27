@@ -32,14 +32,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreateDepartment } from "@/components/hrm-module/department/create/page";
 import DeactivateDepartment from "@/components/hrm-module/department/deactivate/page";
+import ActivateDepartment from "@/components/hrm-module/department/active/page";
 
 interface DepartmentTableProps {
     session: any;
 }
 
 const DepartmentTable = (session: DepartmentTableProps) => {
-    console.warn('🚀 ~ DepartmentTable ~ session:', session);
-
     const accessToken = session?.session.id;
     const [data, setData] = useState<Department[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -172,7 +171,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 <DeactivateDepartment
                                     id={row.original.id}
                                     accessToken={accessToken}
-                                    onDeleteSuccess={() => {
+                                    onInactiveSuccess={() => {
                                         departmentTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
@@ -183,10 +182,10 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 />
                             </div>
                             <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                {/* <DeleteDonationDialog
+                                <ActivateDepartment
                                     id={row.original.id}
                                     accessToken={accessToken}
-                                    onDeleteSuccess={() => {
+                                    onActiveSuccess={() => {
                                         departmentTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
@@ -194,8 +193,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                             filterBy: "",
                                         });
                                     }}
-                                /> */}
-                                Update
+                                />
                             </div>
                         </DropdownMenuContent>
                     </DropdownMenu>
