@@ -18,11 +18,8 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-
     DropdownMenuLabel,
-
     DropdownMenuSeparator,
-
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,13 +30,17 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } fr
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreateDepartment } from "@/components/hrm-module/department/create/page";
+import DeactivateDepartment from "@/components/hrm-module/department/deactivate/page";
 
 interface DepartmentTableProps {
     session: any;
 }
 
 const DepartmentTable = (session: DepartmentTableProps) => {
-    const accessToken = session?.session?.user?.id;
+    console.warn('🚀 ~ DepartmentTable ~ session:', session);
+
+    const accessToken = session?.session.id;
     const [data, setData] = useState<Department[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
@@ -168,7 +169,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                {/* <DeleteDonationDialog
+                                <DeactivateDepartment
                                     id={row.original.id}
                                     accessToken={accessToken}
                                     onDeleteSuccess={() => {
@@ -179,8 +180,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                             filterBy: "",
                                         });
                                     }}
-                                /> */}
-                                Delete
+                                />
                             </div>
                             <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
                                 {/* <DeleteDonationDialog
@@ -231,8 +231,6 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            console.warn('🚀 ~ departmentTableData ~ responseData:', responseData?.data?.data);
-
             const departmentData = responseData?.data?.data as Department[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             setTotalPage(() => pageCount);
@@ -246,7 +244,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagianation changed: Current value of pagiantions state: ", pagination);
+        // console.log("Pagination changed: Current value of pagination state: ", pagination);
         departmentTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -288,6 +286,17 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         }
                     />
                 </div>
+                <CreateDepartment
+                    session={session}
+                    onCreateSuccess={() => {
+                        departmentTableData({
+                            itemsPerPage: pagination.pageSize,
+                            currentPageNumber: pagination.pageIndex,
+                            sortOrder: "asc",
+                            filterBy: "",
+                        });
+                    }}
+                />
             </div>
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
@@ -382,14 +391,12 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     </div>
                     {/* Pagination Controls */}
                     <div className="flex w-full gap-4 md:flex-row md:items-center justify-between md:w-auto">
-
                         {/* Current Page Info and Navigation */}
                         <div className="flex flex-row justify-between text-sm items-center gap-4 md:flex-row md:gap-8">
                             Page {pagination.pageIndex + 1} of{' '}
                             {totalPage}
                         </div>
                         <div className="flex items-center space-x-2">
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-24 p-2"
@@ -402,7 +409,6 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Previous
                             </Button>
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-16 p-2"
@@ -411,7 +417,6 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 }}
                                 disabled={pagination.pageIndex + 1 === totalPage}
                             >
-
                                 <span className="sr-only">Go to next page</span>
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
