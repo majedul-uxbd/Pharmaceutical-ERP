@@ -24,7 +24,7 @@ import { SidebarFooter } from "../ui/sidebar";
 import { NavUser } from "./nav-user";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { ModuleInfo } from "@/utilities/module.enum";
 
@@ -105,12 +105,12 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
               <MenuIcon className="ml-2 size-6" />
             </MenuItem>
 
-            {(session?.module_id === ModuleInfo[1].value) && (
+            {(session?.module_id === ModuleInfo[2].value) && (
               <>
                 {/* Dashboard Menu Item */}
                 <MenuItem
-                  component={<Link href="/sim-module" />}
-                  className={cn(isActiveRoute("/sim-module") && "bg-slate-100")}
+                  component={<Link href="/hrm-module" />}
+                  className={cn(isActiveRoute("/hrm-module") && "bg-slate-100")}
                   icon={
                     <TooltipProvider>
                       <Tooltip>
@@ -164,28 +164,32 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 
                   {/* Dropdown Menu Content (Properly Positioned) */}
                   <DropdownMenuContent
-                    className="w-56 bg-white border shadow-md rounded-md overflow-hidden"
+                    className="w-52 bg-white border shadow-md rounded-md overflow-hidden"
                     align="start"
                     side="right" // Opens from the right side
                   >
-                    <DropdownMenuItem asChild>
-                      <Link href="/volunteer">👥 View Volunteers</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/volunteer/register">📝 Register Volunteer</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/volunteer/reports">📊 Volunteer Reports</Link>
-                    </DropdownMenuItem>
+                    <div>
 
-                    <div className="border-t my-1" />
-
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings/profile">⚙️ Profile Settings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings/security">🔒 Security</Link>
-                    </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/hrm-module/department">Department</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/hrm-module/designation">Designation</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/hrm-module/zone">Zone</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/hrm-module/region">Region</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/hrm-module/market">Market</Link>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
