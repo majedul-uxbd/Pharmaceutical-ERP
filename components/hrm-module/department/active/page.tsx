@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { CircleCheckBig, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface DeactivateDepartmentProps {
@@ -49,7 +49,7 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
                     onClick={() => setIsOpen(true)}
                     className="flex w-full justify-start items-center"
                 >
-                    <Trash2 className="text-green-600 font-bold" size={18} />
+                    <CircleCheckBig className="text-green-600 font-bold" size={18} />
                     <span>Active</span>
                 </Button>
             </DialogTrigger>
@@ -66,7 +66,7 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
                         Cancel
                     </Button>
 
-                    <Button variant="destructive" disabled={buttonDisable} onClick={handleDelete}>
+                    <Button variant="default" className="bg-blue-700 hover:bg-blue-800 text-white" disabled={buttonDisable} onClick={handleDelete}>
                         Confirm
                     </Button>
                 </DialogFooter>

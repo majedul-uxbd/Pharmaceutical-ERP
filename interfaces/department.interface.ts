@@ -9,3 +9,10 @@ export interface Department {
     created_at: Date;
     modified_at: Date | null;
 }
+
+export interface UpdateDepartment {
+    id: number;
+    department_id: string;
+    department_name: string;
+    comment: string | null;
+}

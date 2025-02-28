@@ -67,7 +67,7 @@ export function CreateDepartment({ session, onCreateSuccess }: DonationProps) {
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Create Department</span>
+                    <span className="hidden sm:inline">Add Department</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">

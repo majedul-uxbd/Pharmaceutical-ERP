@@ -33,6 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateDepartment } from "@/components/hrm-module/department/create/page";
 import DeactivateDepartment from "@/components/hrm-module/department/deactivate/page";
 import ActivateDepartment from "@/components/hrm-module/department/active/page";
+import UpdateDepartmentDialog from "@/components/hrm-module/department/update/page";
 
 interface DepartmentTableProps {
     session: any;
@@ -168,6 +169,21 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
+                                <ActivateDepartment
+                                    id={row.original.id}
+                                    accessToken={accessToken}
+                                    onActiveSuccess={() => {
+                                        departmentTableData({
+                                            itemsPerPage: pagination.pageSize,
+                                            currentPageNumber: pagination.pageIndex,
+                                            sortOrder: "asc",
+                                            filterBy: "",
+                                        });
+                                    }}
+                                />
+                            </div>
+
+                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
                                 <DeactivateDepartment
                                     id={row.original.id}
                                     accessToken={accessToken}
@@ -181,11 +197,12 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                     }}
                                 />
                             </div>
+
                             <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                <ActivateDepartment
-                                    id={row.original.id}
+                                <UpdateDepartmentDialog
+                                    rowData={row.original}
                                     accessToken={accessToken}
-                                    onActiveSuccess={() => {
+                                    onUpdateSuccess={() => {
                                         departmentTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
@@ -271,10 +288,10 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     })
     return (
         <div className="w-full">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-2/5"
+                        className="w-full md:w-3/5"
                         placeholder="Filter by Department Name..."
                         value={(
                             table.getColumn('department_name')?.getFilterValue() as string
@@ -284,17 +301,19 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         }
                     />
                 </div>
-                <CreateDepartment
-                    session={session}
-                    onCreateSuccess={() => {
-                        departmentTableData({
-                            itemsPerPage: pagination.pageSize,
-                            currentPageNumber: pagination.pageIndex,
-                            sortOrder: "asc",
-                            filterBy: "",
-                        });
-                    }}
-                />
+                <div className="">
+                    <CreateDepartment
+                        session={session}
+                        onCreateSuccess={() => {
+                            departmentTableData({
+                                itemsPerPage: pagination.pageSize,
+                                currentPageNumber: pagination.pageIndex,
+                                sortOrder: "asc",
+                                filterBy: "",
+                            });
+                        }}
+                    />
+                </div>
             </div>
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
