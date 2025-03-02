@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
-import { CreateSchema } from "@/schema/department.schema";
+import { CreateSchema } from "@/schema/designation.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SquarePlus } from "lucide-react";
 import { useState } from "react";
@@ -18,11 +18,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
-interface CreateDepartmentProps {
+interface CreateDesignationProps {
     session: any;
     onCreateSuccess(): void;
 }
-export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentProps) {
+export function CreateDesignation({ session, onCreateSuccess }: CreateDesignationProps) {
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
@@ -30,8 +30,10 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
         defaultValues: {
-            department_id: "",
-            department_name: "",
+            designation_id: "",
+            designation_name: "",
+            short_name: "",
+            description: "",
             comment: ""
         },
     });
@@ -39,7 +41,7 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
         setButtonDisable(true);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/add-department`,
+            `${process.env.NEXT_PUBLIC_API_URL}/designation/add-designation`,
             {
                 method: 'POST',
                 headers: {
@@ -67,17 +69,17 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Department</span>
+                    <span className="hidden sm:inline">Add Designation</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 {/* Header Section */}
                 <DialogHeader className="text-center">
                     <DialogTitle className="text-2xl font-semibold text-gray-800">
-                        Create Department
+                        Create Designation
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 text-center">
-                        Fill in the details below to create a new department.
+                    <DialogDescription className="text-gray-500">
+                        Fill in the details below to create a new designation.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -86,30 +88,60 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
                         className="space-y-6"
                     >
                         <div className="space-y-4">
-                            {/* Department ID */}
+                            {/* Designation ID */}
                             <FormField
                                 control={form.control}
-                                name="department_id"
+                                name="designation_id"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Department ID</FormLabel>
+                                        <FormLabel>Designation ID</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="Enter department ID" />
+                                            <Input {...field} placeholder="Enter Designation ID" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            {/* Department Name */}
+                            {/* Designation Name */}
                             <FormField
                                 control={form.control}
-                                name="department_name"
+                                name="designation_name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Department Name</FormLabel>
+                                        <FormLabel>Designation Name</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="IT Department" />
+                                            <Input {...field} placeholder="Enter Designation Name" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Designation Short Name */}
+                            <FormField
+                                control={form.control}
+                                name="short_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Short Name</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter Short Name" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Description Field */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Description</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter Description" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

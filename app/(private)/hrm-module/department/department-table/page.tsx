@@ -157,6 +157,8 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
+                const isActive = row.original.department_status === 1;
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -168,37 +170,40 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                <ActivateDepartment
-                                    id={row.original.id}
-                                    accessToken={accessToken}
-                                    onActiveSuccess={() => {
-                                        departmentTableData({
-                                            itemsPerPage: pagination.pageSize,
-                                            currentPageNumber: pagination.pageIndex,
-                                            sortOrder: "asc",
-                                            filterBy: "",
-                                        });
-                                    }}
-                                />
-                            </div>
 
-                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                <DeactivateDepartment
-                                    id={row.original.id}
-                                    accessToken={accessToken}
-                                    onInactiveSuccess={() => {
-                                        departmentTableData({
-                                            itemsPerPage: pagination.pageSize,
-                                            currentPageNumber: pagination.pageIndex,
-                                            sortOrder: "asc",
-                                            filterBy: "",
-                                        });
-                                    }}
-                                />
-                            </div>
+                            {isActive ? (
+                                <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                    <DeactivateDepartment
+                                        id={row.original.id}
+                                        accessToken={accessToken}
+                                        onInactiveSuccess={() => {
+                                            departmentTableData({
+                                                itemsPerPage: pagination.pageSize,
+                                                currentPageNumber: pagination.pageIndex,
+                                                sortOrder: "asc",
+                                                filterBy: "",
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                    <ActivateDepartment
+                                        id={row.original.id}
+                                        accessToken={accessToken}
+                                        onActiveSuccess={() => {
+                                            departmentTableData({
+                                                itemsPerPage: pagination.pageSize,
+                                                currentPageNumber: pagination.pageIndex,
+                                                sortOrder: "asc",
+                                                filterBy: "",
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            )}
 
-                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
+                            <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
                                 <UpdateDepartmentDialog
                                     rowData={row.original}
                                     accessToken={accessToken}
@@ -216,7 +221,8 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     </DropdownMenu>
                 );
             },
-        },
+        }
+
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {

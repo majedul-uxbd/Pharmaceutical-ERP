@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Designation } from "@/interfaces/designation.interface";
+import { CreateDesignation } from "@/components/hrm-module/designation/create/page";
 
 
 
@@ -93,6 +94,14 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: "Designation Name",
             cell: ({ row }) => (
                 <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "short_name",
+            header: "Short Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("short_name")}</div>
             ),
         },
 
@@ -286,7 +295,7 @@ const DesignationTable = (session: DesignationTableProps) => {
     })
     return (
         <div className="w-full">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
                         className="w-2/5"
@@ -297,6 +306,19 @@ const DesignationTable = (session: DesignationTableProps) => {
                         onChange={(event) =>
                             table.getColumn('designation_name')?.setFilterValue(event.target.value)
                         }
+                    />
+                </div>
+                <div className="">
+                    <CreateDesignation
+                        session={session}
+                        onCreateSuccess={() => {
+                            departmentTableData({
+                                itemsPerPage: pagination.pageSize,
+                                currentPageNumber: pagination.pageIndex,
+                                sortOrder: "asc",
+                                filterBy: "",
+                            });
+                        }}
                     />
                 </div>
             </div>
