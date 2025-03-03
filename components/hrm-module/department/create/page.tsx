@@ -65,7 +65,7 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-700 hover:bg-blue-800">
+                <Button className="bg-green-800 hover:bg-green-900">
                     <SquarePlus className="font-bold" size={20} />
                     <span className="hidden sm:inline">Add Department</span>
                 </Button>

@@ -35,6 +35,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Designation } from "@/interfaces/designation.interface";
 import { CreateDesignation } from "@/components/hrm-module/designation/create/page";
+import ActivateDesignation from "@/components/hrm-module/designation/active/page";
+import DeactivateDesignation from "@/components/hrm-module/designation/deactivate/page";
+import UpdateDesignationDialog from "@/components/hrm-module/designation/update/page";
 
 
 
@@ -43,7 +46,8 @@ interface DesignationTableProps {
 }
 
 const DesignationTable = (session: DesignationTableProps) => {
-    const accessToken = session?.session?.user?.id;
+    const accessToken = session?.session?.id;
+
     const [data, setData] = useState<Designation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
@@ -141,6 +145,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: "Status",
             cell: ({ row }) => {
                 const isActive = row.getValue("designation_status") === 1;
+
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -177,6 +182,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
+                const isActive = row.original.designation_status === 1;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -188,35 +194,50 @@ const DesignationTable = (session: DesignationTableProps) => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                {/* <DeleteDonationDialog
-                                    id={row.original.id}
+                            {isActive ? (
+                                <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                    <DeactivateDesignation
+                                        id={row.original.id}
+                                        accessToken={accessToken}
+                                        onInactiveSuccess={() => {
+                                            designationTableData({
+                                                itemsPerPage: pagination.pageSize,
+                                                currentPageNumber: pagination.pageIndex,
+                                                sortOrder: "asc",
+                                                filterBy: "",
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                    <ActivateDesignation
+                                        id={row.original.id}
+                                        accessToken={accessToken}
+                                        onActiveSuccess={() => {
+                                            designationTableData({
+                                                itemsPerPage: pagination.pageSize,
+                                                currentPageNumber: pagination.pageIndex,
+                                                sortOrder: "asc",
+                                                filterBy: "",
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                <UpdateDesignationDialog
+                                    rowData={row.original}
                                     accessToken={accessToken}
-                                    onDeleteSuccess={() => {
-                                        departmentTableData({
+                                    onUpdateSuccess={() => {
+                                        designationTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
                                             filterBy: "",
                                         });
                                     }}
-                                /> */}
-                                Delete
-                            </div>
-                            <div className='flex w-full flex-row justify-start items-center  hover:rounded-md'>
-                                {/* <DeleteDonationDialog
-                                    id={row.original.id}
-                                    accessToken={accessToken}
-                                    onDeleteSuccess={() => {
-                                        departmentTableData({
-                                            itemsPerPage: pagination.pageSize,
-                                            currentPageNumber: pagination.pageIndex,
-                                            sortOrder: "asc",
-                                            filterBy: "",
-                                        });
-                                    }}
-                                /> */}
-                                Update
+                                />
                             </div>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -234,9 +255,9 @@ const DesignationTable = (session: DesignationTableProps) => {
         }))
     }, [pagination])
 
-    const departmentTableData = async (paginationData: any) => {
+    const designationTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-designation-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/designation/get-designation-data`,
             {
                 method: 'POST',
                 headers: {
@@ -254,6 +275,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             const responseData = await response.json();
 
             const designationData = responseData?.data?.data as Designation[];
+
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             setTotalPage(() => pageCount);
             setData(() => designationData)
@@ -267,7 +289,7 @@ const DesignationTable = (session: DesignationTableProps) => {
 
     useEffect(() => {
         // console.log("Pagianation changed: Current value of pagiantions state: ", pagination);
-        departmentTableData({
+        designationTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -312,7 +334,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                     <CreateDesignation
                         session={session}
                         onCreateSuccess={() => {
-                            departmentTableData({
+                            designationTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
                                 sortOrder: "asc",

@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { CircleCheckBig, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface DeactivateDepartmentProps {
+interface DeactivateDesignationProps {
     id: number;
     accessToken: string;
     onActiveSuccess: () => void;
 }
 
-const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepartmentProps) => {
+const ActivateDesignation = ({ id, accessToken, onActiveSuccess }: DeactivateDesignationProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -18,7 +18,7 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
         setButtonDisable(true);
         setIsOpen(false);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/active`,
+            `${process.env.NEXT_PUBLIC_API_URL}/designation/active`,
             {
                 method: 'POST',
                 headers: {
@@ -59,7 +59,7 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
                     <DialogTitle className="text-lg font-semibold">Confirm Activation</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    Are you sure you want to active this Department?
+                    Are you sure you want to active this Designation?
                 </DialogDescription>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsOpen(false)}>
@@ -76,4 +76,4 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
 }
 
 
-export default ActivateDepartment;
+export default ActivateDesignation;

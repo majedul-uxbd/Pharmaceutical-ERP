@@ -31,9 +31,7 @@ const DeactivateDepartment = ({ id, accessToken, onInactiveSuccess }: Deactivate
 
         const responseData = await response.json();
         if (responseData.status === 'success') {
-            toast.success(responseData?.message, {
-                style: { backgroundColor: "white", color: "black" },
-            });
+            toast.success(responseData?.message);
 
             onInactiveSuccess();
             setIsOpen(true)

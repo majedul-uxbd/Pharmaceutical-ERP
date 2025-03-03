@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CircleCheckBig, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface DeactivateDepartmentProps {
+interface DeactivateDesignationProps {
     id: number;
     accessToken: string;
-    onActiveSuccess: () => void;
+    onInactiveSuccess: () => void;
 }
 
-const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepartmentProps) => {
+const DeactivateDesignation = ({ id, accessToken, onInactiveSuccess }: DeactivateDesignationProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -18,7 +18,7 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
         setButtonDisable(true);
         setIsOpen(false);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/active`,
+            `${process.env.NEXT_PUBLIC_API_URL}/designation/inactive`,
             {
                 method: 'POST',
                 headers: {
@@ -32,7 +32,8 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
         const responseData = await response.json();
         if (responseData.status === 'success') {
             toast.success(responseData?.message);
-            onActiveSuccess();
+
+            onInactiveSuccess();
             setIsOpen(true)
         } else {
             setIsOpen(false)
@@ -49,24 +50,24 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
                     onClick={() => setIsOpen(true)}
                     className="flex w-full justify-start items-center"
                 >
-                    <CircleCheckBig className="text-green-600 font-bold" size={18} />
-                    <span>Active</span>
+                    <Trash2 className="text-red-700 font-bold" size={18} />
+                    <span>Inactive</span>
                 </Button>
             </DialogTrigger>
 
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-semibold">Confirm Activation</DialogTitle>
+                    <DialogTitle className="text-lg font-semibold">Confirm Inactivation</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    Are you sure you want to active this Department?
+                    Are you sure you want to inactive this designation?
                 </DialogDescription>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsOpen(false)}>
                         Cancel
                     </Button>
 
-                    <Button variant="default" disabled={buttonDisable} onClick={handleDelete}>
+                    <Button variant="destructive" disabled={buttonDisable} onClick={handleDelete}>
                         Confirm
                     </Button>
                 </DialogFooter>
@@ -76,4 +77,4 @@ const ActivateDepartment = ({ id, accessToken, onActiveSuccess }: DeactivateDepa
 }
 
 
-export default ActivateDepartment;
+export default DeactivateDesignation;

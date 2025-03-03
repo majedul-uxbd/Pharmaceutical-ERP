@@ -23,18 +23,18 @@ import { z } from "zod";
 import "react-phone-number-input/style.css";
 import { PenLine, UserPen } from "lucide-react";
 import { toast } from "sonner";
-import { Department, UpdateDepartment } from "@/interfaces/department.interface";
-import { UpdateSchema } from "@/schema/department.schema";
+import { UpdateSchema } from "@/schema/designation.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
+import { UpdateDesignation } from "@/interfaces/designation.interface";
 
-interface UpdateDepartmentDialogProps {
-    rowData: UpdateDepartment;
+interface UpdateDesignationDialogProps {
+    rowData: UpdateDesignation;
     accessToken: string;
     onUpdateSuccess: () => void;
 }
 
-const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: UpdateDepartmentDialogProps) => {
+const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: UpdateDesignationDialogProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -46,8 +46,10 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
 
     useEffect(() => {
         form.reset({
-            department_id: rowData.department_id,
-            department_name: rowData.department_name,
+            designation_id: rowData.designation_id,
+            designation_name: rowData.designation_name,
+            short_name: rowData.short_name,
+            description: rowData.description,
             comment: rowData.comment
         });
     }, [rowData, form]);
@@ -57,7 +59,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
         try {
             setButtonDisable(true)
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/department/update`,
+                `${process.env.NEXT_PUBLIC_API_URL}/designation/update`,
                 {
                     method: 'POST',
                     headers: {
@@ -98,7 +100,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                     <span>Update</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl bg-white">
+            <DialogContent className="max-w-lg h-[98vh]   p-6 rounded-xl shadow-2xl bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-semibold text-center text-gray-800">
                         Update Department
@@ -107,17 +109,16 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                         Update Department Information
                     </DialogDescription>
                 </DialogHeader>
-
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(handleUpdateData)}
                         className="space-y-6"
                     >
-                        <div className="space-y-4">
+                        <div className="max-h-[70vh] space-y-4 overflow-y-auto">
                             {/* Department ID Field*/}
                             <FormField
                                 control={form.control}
-                                name="department_id"
+                                name="designation_id"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
@@ -137,7 +138,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                             {/* Department Name Field */}
                             <FormField
                                 control={form.control}
-                                name="department_name"
+                                name="designation_name"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
@@ -147,6 +148,48 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                                             <Input
                                                 {...field}
                                                 placeholder="John Doe"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Department Short Name Field */}
+                            <FormField
+                                control={form.control}
+                                name="short_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Short Name
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter designation short name"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Department description Field */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Description
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                value={field.value || ""}
+                                                placeholder="Enter your comment"
+                                                className="min-h-[40px]"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -168,7 +211,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                                                 {...field}
                                                 value={field.value || ""}
                                                 placeholder="Enter your comment"
-                                                className="min-h-[100px]"
+                                                className="min-h-[80px]"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -203,4 +246,4 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
     );
 };
 
-export default UpdateDepartmentDialog;
+export default UpdateDesignationDialog;

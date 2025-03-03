@@ -236,7 +236,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
     const departmentTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-department-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
             {
                 method: 'POST',
                 headers: {

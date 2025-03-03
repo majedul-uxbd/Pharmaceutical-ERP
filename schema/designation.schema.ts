@@ -17,7 +17,7 @@ export const CreateSchema = z.object({
         .max(100, {
             message: 'Maximum 100 characters allowed',
         }),
-        short_name : z
+    short_name: z
         .string()
         .min(1, {
             message: 'Short name is required',
@@ -25,10 +25,10 @@ export const CreateSchema = z.object({
         .max(45, {
             message: 'Maximum 45 characters allowed',
         }),
-        description: z.string().max(500, {
-            message: 'Maximum 500 characters allowed',
-        }),
-        comment: z.string().max(500, {
+    description: z.string().max(500, {
+        message: 'Maximum 500 characters allowed',
+    }),
+    comment: z.string().max(500, {
         message: 'Maximum 500 characters allowed',
     }),
 });
@@ -50,7 +50,7 @@ export const UpdateSchema = z.object({
         .max(100, {
             message: 'Maximum 100 characters allowed',
         }),
-        short_name : z
+    short_name: z
         .string()
         .min(1, {
             message: 'Short name is required',
@@ -58,11 +58,12 @@ export const UpdateSchema = z.object({
         .max(45, {
             message: 'Maximum 45 characters allowed',
         }),
-        description: z
+    description: z
         .string()
         .max(500, {
             message: 'Maximum 500 characters allowed',
-        }),
+        })
+        .nullable(),
     comment: z
         .string()
         .max(500, {
