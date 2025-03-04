@@ -31,7 +31,7 @@ export const CreateSchema = z.object({
 });
 
 export const UpdateSchema = z.object({
-    deport_name: z
+    depot_name: z
         .string()
         .min(1, {
             message: 'Zone code is required',

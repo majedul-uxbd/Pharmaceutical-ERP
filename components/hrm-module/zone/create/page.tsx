@@ -101,7 +101,7 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                                         name="depot_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Module Name</FormLabel>
+                                                <FormLabel>Depot Name</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>

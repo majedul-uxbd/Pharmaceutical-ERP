@@ -31,6 +31,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zone } from "@/interfaces/zone.interface";
 import { CreateZone } from "@/components/hrm-module/zone/create/page";
+import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
+import ActivateZone from "@/components/hrm-module/zone/active/page";
+import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
 
 interface ZoneTableProps {
     session: any;
@@ -163,9 +166,9 @@ const ZoneTable = (session: ZoneTableProps) => {
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
 
-                            {/* {isActive ? (
+                            {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateDepartment
+                                    <DeactivateZone
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
@@ -180,7 +183,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateDepartment
+                                    <ActivateZone
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
@@ -196,8 +199,9 @@ const ZoneTable = (session: ZoneTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateDepartmentDialog
+                                <UpdateZoneDialog
                                     rowData={row.original}
+                                    zoneData={zoneData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
                                         zoneTableData({
@@ -208,7 +212,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                         });
                                     }}
                                 />
-                            </div> */}
+                            </div>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
