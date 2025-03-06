@@ -47,6 +47,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
     useEffect(() => {
         form.reset({
             department_id: rowData.department_id,
+            department_code: rowData.department_code,
             department_name: rowData.department_name,
             comment: rowData.comment
         });
@@ -126,7 +127,27 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="John Doe"
+                                                placeholder="Enter Department ID"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Department Code Field*/}
+                            <FormField
+                                control={form.control}
+                                name="department_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Department Code
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter Department Code"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -146,7 +167,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="John Doe"
+                                                placeholder="Enter Department Name"
                                             />
                                         </FormControl>
                                         <FormMessage />

@@ -9,6 +9,14 @@ export const CreateSchema = z.object({
         .max(10, {
             message: 'Maximum 10 characters allowed',
         }),
+    department_code: z
+        .string()
+        .min(1, {
+            message: 'Department code is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
+        }),
     department_name: z
         .string()
         .min(1, {
@@ -27,6 +35,14 @@ export const UpdateSchema = z.object({
         .string()
         .min(1, {
             message: 'Department ID is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
+        }),
+    department_code: z
+        .string()
+        .min(1, {
+            message: 'Department code is required',
         })
         .max(10, {
             message: 'Maximum 10 characters allowed',

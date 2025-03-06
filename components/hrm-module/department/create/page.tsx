@@ -31,6 +31,7 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             department_id: "",
+            department_code: "",
             department_name: "",
             comment: ""
         },
@@ -53,7 +54,7 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
         const responseData = await response.json();
         if (responseData.status === 'success') {
             toast.success(responseData?.message);
-            form.reset();
+            // form.reset();
             onCreateSuccess();
             setIsDialogOpen(false); // Close the dialog when successful
         } else {
@@ -95,6 +96,21 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
                                         <FormLabel>Department ID</FormLabel>
                                         <FormControl>
                                             <Input {...field} placeholder="Enter department ID" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Department code */}
+                            <FormField
+                                control={form.control}
+                                name="department_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Department code</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter department code" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

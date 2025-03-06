@@ -1,6 +1,7 @@
 export interface Department {
     id: number;
     department_id: string;
+    department_code: string;
     department_name: string;
     comment: string | null;
     created_by: string;
@@ -13,6 +14,7 @@ export interface Department {
 export interface UpdateDepartment {
     id: number;
     department_id: string;
+    department_code: string;
     department_name: string;
     comment: string | null;
 }

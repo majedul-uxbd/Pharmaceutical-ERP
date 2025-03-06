@@ -87,6 +87,14 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         },
 
         {
+            accessorKey: "department_code",
+            header: "Department Code",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("department_code")}</div>
+            ),
+        },
+
+        {
             accessorKey: "department_name",
             header: "Department Name",
             cell: ({ row }) => (
