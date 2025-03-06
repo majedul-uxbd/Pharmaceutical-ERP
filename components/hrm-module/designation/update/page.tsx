@@ -47,8 +47,8 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
     useEffect(() => {
         form.reset({
             designation_id: rowData.designation_id,
+            designation_code: rowData.designation_code,
             designation_name: rowData.designation_name,
-            short_name: rowData.short_name,
             description: rowData.description,
             comment: rowData.comment
         });
@@ -103,10 +103,10 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
             <DialogContent className="max-w-lg h-[98vh]   p-6 rounded-xl shadow-2xl bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-semibold text-center text-gray-800">
-                        Update Department
+                        Update Designation
                     </DialogTitle>
                     <DialogDescription className="text-center text-gray-500">
-                        Update Department Information
+                        Update Designation Information
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -115,19 +115,19 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                         className="space-y-6"
                     >
                         <div className="max-h-[70vh] space-y-4 overflow-y-auto">
-                            {/* Department ID Field*/}
+                            {/* Designation ID Field*/}
                             <FormField
                                 control={form.control}
                                 name="designation_id"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Department ID
+                                            Designation ID
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="John Doe"
+                                                placeholder="Enter Designation ID"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -135,19 +135,39 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                                 )}
                             />
 
-                            {/* Department Name Field */}
+                            {/* Designation Code Field*/}
+                            <FormField
+                                control={form.control}
+                                name="designation_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Designation code
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter Designation Code"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Designation Name Field */}
                             <FormField
                                 control={form.control}
                                 name="designation_name"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Department Name
+                                            Designation Name
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="John Doe"
+                                                placeholder="Enter Designation Name"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -155,27 +175,7 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                                 )}
                             />
 
-                            {/* Department Short Name Field */}
-                            <FormField
-                                control={form.control}
-                                name="short_name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Short Name
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter designation short name"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Department description Field */}
+                            {/* Designation description Field */}
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -188,7 +188,7 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                                             <Textarea
                                                 {...field}
                                                 value={field.value || ""}
-                                                placeholder="Enter your comment"
+                                                placeholder="Enter Description"
                                                 className="min-h-[40px]"
                                             />
                                         </FormControl>
@@ -210,7 +210,7 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                                             <Textarea
                                                 {...field}
                                                 value={field.value || ""}
-                                                placeholder="Enter your comment"
+                                                placeholder="Enter Your comment"
                                                 className="min-h-[80px]"
                                             />
                                         </FormControl>

@@ -31,8 +31,8 @@ export function CreateDesignation({ session, onCreateSuccess }: CreateDesignatio
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             designation_id: "",
+            designation_code: "",
             designation_name: "",
-            short_name: "",
             description: "",
             comment: ""
         },
@@ -103,6 +103,21 @@ export function CreateDesignation({ session, onCreateSuccess }: CreateDesignatio
                                 )}
                             />
 
+                            {/* Designation Code */}
+                            <FormField
+                                control={form.control}
+                                name="designation_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Designation Code</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter Designation Code" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                             {/* Designation Name */}
                             <FormField
                                 control={form.control}
@@ -112,21 +127,6 @@ export function CreateDesignation({ session, onCreateSuccess }: CreateDesignatio
                                         <FormLabel>Designation Name</FormLabel>
                                         <FormControl>
                                             <Input {...field} placeholder="Enter Designation Name" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Designation Short Name */}
-                            <FormField
-                                control={form.control}
-                                name="short_name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Short Name</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} placeholder="Enter Short Name" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

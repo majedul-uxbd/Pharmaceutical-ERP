@@ -85,6 +85,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             enableSorting: true,
             enableHiding: false,
         },
+
         {
             accessorKey: "designation_id",
             header: "Designation ID",
@@ -94,18 +95,18 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
-            accessorKey: "designation_name",
-            header: "Designation Name",
+            accessorKey: "designation_code",
+            header: "Designation Code",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_name")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_code")}</div>
             ),
         },
 
         {
-            accessorKey: "short_name",
-            header: "Short Name",
+            accessorKey: "designation_name",
+            header: "Designation Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("short_name")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_name")}</div>
             ),
         },
 
@@ -145,7 +146,6 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: "Status",
             cell: ({ row }) => {
                 const isActive = row.getValue("designation_status") === 1;
-
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -288,11 +288,10 @@ const DesignationTable = (session: DesignationTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagianation changed: Current value of pagiantions state: ", pagination);
         designationTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
-            sortOrder: "asc",
+            sortOrder: "desc",
             filterBy: ""
         })
     }, [pagination]);
