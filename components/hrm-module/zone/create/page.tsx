@@ -21,10 +21,10 @@ import * as z from "zod";
 
 interface CreateZoneProps {
     session: any;
-    zoneData: any;
+    depotData: any;
     onCreateSuccess(): void;
 }
-export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZoneProps) {
+export function CreateZone({ session, depotData, onCreateSuccess }: CreateZoneProps) {
 
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,7 +46,7 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
 
         setButtonDisable(true);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/add-zone`,
+            `${process.env.NEXT_PUBLIC_API_URL}/depot/add-depot`,
             {
                 method: 'POST',
                 headers: {
@@ -78,7 +78,7 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                {zoneData.length > 0 ? (
+                {depotData.length > 0 ? (
                     <>
                         {/* Header Section */}
                         <DialogHeader className="text-center">
@@ -86,7 +86,7 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                                 Create Zone
                             </DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Fill in the details below to create a new zone.
+                                Fill in the details below to create a new depot.
                             </DialogDescription>
                         </DialogHeader>
                         <Form {...form}>
@@ -109,9 +109,9 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {zoneData.map((zone: any) => (
-                                                            <SelectItem key={zone.id} value={zone.depot_id}>
-                                                                {zone.depot_name}
+                                                        {depotData.map((depot: any) => (
+                                                            <SelectItem key={depot.id} value={depot.depot_id}>
+                                                                {depot.depot_name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>

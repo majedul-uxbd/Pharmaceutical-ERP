@@ -25,18 +25,18 @@ import { PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UpdateZone } from "@/interfaces/zone.interface";
 import { UpdateSchema } from "@/schema/zone.schema";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UpdateZoneDialogProps {
     rowData: UpdateZone;
-    zoneData: any;
+    depotData: any;
     accessToken: string;
     onUpdateSuccess: () => void;
 }
 
-const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: UpdateZoneDialogProps) => {
+const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: UpdateZoneDialogProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -47,7 +47,7 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
     });
 
     useEffect(() => {
-        const selectedDepot = zoneData.find((zone: any) => zone.depot_name === rowData.depot_name);
+        const selectedDepot = depotData.find((depot: any) => depot.depot_name === rowData.depot_name);
         form.reset({
             depot_name: selectedDepot ? selectedDepot.depot_id : "",
             zone_id: rowData.zone_id,
@@ -55,7 +55,7 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
             zone_name: rowData.zone_name,
             comment: rowData.comment || "",
         });
-    }, [rowData, form, zoneData]);
+    }, [rowData, form, depotData]);
 
 
     const handleUpdateData = async (values: z.infer<typeof UpdateSchema>) => {
@@ -63,7 +63,7 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
         try {
             setButtonDisable(true)
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/zone/update`,
+                `${process.env.NEXT_PUBLIC_API_URL}/depot/update`,
                 {
                     method: 'POST',
                     headers: {
@@ -136,9 +136,9 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {zoneData.map((zone: any) => (
-                                                    <SelectItem key={zone.id} value={zone.depot_id}>
-                                                        {zone.depot_name}
+                                                {depotData.map((depot: any) => (
+                                                    <SelectItem key={depot.id} value={depot.depot_id}>
+                                                        {depot.depot_name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -200,7 +200,7 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="Enter a zone name"
+                                                placeholder="Enter a depot name"
                                             />
                                         </FormControl>
                                         <FormMessage />

@@ -9,6 +9,14 @@ export const CreateSchema = z.object({
         .max(100, {
             message: 'Maximum 100 characters allowed',
         }),
+    region_id: z
+        .string()
+        .min(1, {
+            message: 'Region ID is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
+        }),
     region_code: z
         .string()
         .min(1, {
@@ -38,6 +46,14 @@ export const UpdateSchema = z.object({
         })
         .max(100, {
             message: 'Maximum 100 characters allowed',
+        }),
+    region_id: z
+        .string()
+        .min(1, {
+            message: 'Region ID is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
         }),
     region_code: z
         .string()

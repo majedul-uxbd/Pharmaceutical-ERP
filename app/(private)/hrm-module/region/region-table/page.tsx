@@ -91,6 +91,14 @@ const RegionTable = (session: RegionTableProps) => {
         },
 
         {
+            accessorKey: "region_id",
+            header: "Region ID",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_id")}</div>
+            ),
+        },
+
+        {
             accessorKey: "region_code",
             header: "Region Code",
             cell: ({ row }) => (

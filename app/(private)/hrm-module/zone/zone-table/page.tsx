@@ -52,7 +52,7 @@ const ZoneTable = (session: ZoneTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-    const [zoneData, setZoneData] = useState<Zone[]>([]);
+    const [depotData, setDepotData] = useState<Zone[]>([]);
 
 
     const columns: ColumnDef<Zone>[] = [
@@ -209,7 +209,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
                                 <UpdateZoneDialog
                                     rowData={row.original}
-                                    zoneData={zoneData}
+                                    depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
                                         zoneTableData({
@@ -254,7 +254,7 @@ const ZoneTable = (session: ZoneTableProps) => {
         // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
 
         if (responseData.status === 'success') {
-            setZoneData(() => responseData?.data)
+            setDepotData(() => responseData?.data)
             setIsLoading(false);
 
         } else {
@@ -344,7 +344,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                 <div className="">
                     <CreateZone
                         session={session}
-                        zoneData={zoneData}
+                        depotData={depotData}
                         onCreateSuccess={() => {
                             zoneTableData({
                                 itemsPerPage: pagination.pageSize,

@@ -34,8 +34,9 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             zone_name: "",
-            region_name: "",
+            region_id: "",
             region_code: "",
+            region_name: "",
             comment: ""
         },
     });
@@ -94,7 +95,7 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    {/* Depot Name */}
+                                    {/* Zone Name */}
                                     <FormField
                                         control={form.control}
                                         name="zone_name"
@@ -104,12 +105,12 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select a module" />
+                                                            <SelectValue placeholder="Select a Zone" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         {zoneData.map((zone: any) => (
-                                                            <SelectItem key={zone.id} value={zone.zone_code}>
+                                                            <SelectItem key={zone.id} value={zone.zone_id}>
                                                                 {zone.zone_name}
                                                             </SelectItem>
                                                         ))}
@@ -120,7 +121,22 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                         )}
                                     />
 
-                                    {/* Zone Code */}
+                                    {/* Region ID */}
+                                    <FormField
+                                        control={form.control}
+                                        name="region_id"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Region ID</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="Enter Region ID" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Region Code */}
                                     <FormField
                                         control={form.control}
                                         name="region_code"
@@ -128,14 +144,14 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                             <FormItem>
                                                 <FormLabel>Region Code</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter Zone Code" />
+                                                    <Input {...field} placeholder="Enter Region Code" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
 
-                                    {/* Zone Name */}
+                                    {/* Region Name */}
                                     <FormField
                                         control={form.control}
                                         name="region_name"
@@ -143,7 +159,7 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                             <FormItem>
                                                 <FormLabel>Region Name</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter Zone Name" />
+                                                    <Input {...field} placeholder="Enter Region Name" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

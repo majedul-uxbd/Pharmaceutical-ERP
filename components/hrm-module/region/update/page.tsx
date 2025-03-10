@@ -38,6 +38,7 @@ interface UpdateRegionDialogProps {
 
 const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: UpdateRegionDialogProps) => {
 
+
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -49,15 +50,16 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
 
     useEffect(() => {
         const selectedZone = zoneData.find((zone: any) => zone.zone_name === rowData.zone_name);
-        console.warn('🚀 ~ useEffect ~ selectedZone:', selectedZone);
 
         form.reset({
-            zone_name: selectedZone ? selectedZone.zone_name : "",
-            region_name: rowData.region_name,
+            zone_name: selectedZone ? selectedZone.zone_id : "", // Fix: Use zone_id
+            region_id: rowData.region_id,
             region_code: rowData.region_code,
+            region_name: rowData.region_name,
             comment: rowData.comment || "",
         });
     }, [rowData, form, zoneData]);
+
 
 
     const handleUpdateData = async (values: z.infer<typeof UpdateSchema>) => {
@@ -91,6 +93,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
             setButtonDisable(false)
             console.error("file: register-form.tsx:67 ~ onSubmit ~ error:", error);
         }
+
     };
 
 
@@ -130,7 +133,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                                         <FormLabel>Zone Name</FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
-                                            value={field.value || ""}
+                                            value={field.value ? String(field.value) : ""}
                                         >
                                             <FormControl>
                                                 <SelectTrigger>
@@ -139,7 +142,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                                             </FormControl>
                                             <SelectContent>
                                                 {zoneData.map((zone: any) => (
-                                                    <SelectItem key={zone.id} value={zone.zone_code}>
+                                                    <SelectItem key={zone.id} value={String(zone.zone_id)}>
                                                         {zone.zone_name}
                                                     </SelectItem>
                                                 ))}
@@ -150,21 +153,15 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                                 )}
                             />
 
-
-                            {/* Region Name Field */}
+                            {/* Region ID */}
                             <FormField
                                 control={form.control}
-                                name="region_name"
+                                name="region_id"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>
-                                            Region Name
-                                        </FormLabel>
+                                        <FormLabel>Region ID</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter a region name"
-                                            />
+                                            <Input {...field} placeholder="Enter Region ID" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -184,6 +181,26 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                                             <Input
                                                 {...field}
                                                 placeholder="Enter region code"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Region Name Field */}
+                            <FormField
+                                control={form.control}
+                                name="region_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Region Name
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter a region name"
                                             />
                                         </FormControl>
                                         <FormMessage />
