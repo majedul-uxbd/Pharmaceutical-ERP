@@ -54,7 +54,7 @@ export function CreateDepartment({ session, onCreateSuccess }: CreateDepartmentP
         const responseData = await response.json();
         if (responseData.status === 'success') {
             toast.success(responseData?.message);
-            // form.reset();
+            form.reset();
             onCreateSuccess();
             setIsDialogOpen(false); // Close the dialog when successful
         } else {

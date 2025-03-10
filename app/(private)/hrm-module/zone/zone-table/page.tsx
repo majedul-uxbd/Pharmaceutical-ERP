@@ -81,6 +81,14 @@ const ZoneTable = (session: ZoneTableProps) => {
         },
 
         {
+            accessorKey: "zone_id",
+            header: "Zone ID",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_id")}</div>
+            ),
+        },
+
+        {
             accessorKey: "zone_name",
             header: "Zone Name",
             cell: ({ row }) => (

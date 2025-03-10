@@ -11,11 +11,10 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zone } from "@/interfaces/zone.interface";
 import { CreateSchema } from "@/schema/zone.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -35,8 +34,9 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             depot_name: "",
-            zone_name: "",
+            zone_id: "",
             zone_code: "",
+            zone_name: "",
             comment: ""
         },
     });
@@ -105,7 +105,7 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select a module" />
+                                                            <SelectValue placeholder="Select a depot" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
@@ -116,6 +116,21 @@ export function CreateZone({ session, zoneData, onCreateSuccess }: CreateZonePro
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Zone ID */}
+                                    <FormField
+                                        control={form.control}
+                                        name="zone_id"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Zone ID</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="Enter Zone ID" />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

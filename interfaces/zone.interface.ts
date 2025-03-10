@@ -1,8 +1,9 @@
 export interface Zone {
     id: number;
     depot_name: string;
-    zone_name: string;
+    zone_id: string;
     zone_code: string;
+    zone_name: string;
     comment: string | null;
     zone_status: number;
     created_at: Date;
@@ -12,7 +13,8 @@ export interface Zone {
 export interface UpdateZone {
     id: number;
     depot_name: string;
-    zone_name: string;
+    zone_id: string;
     zone_code: string;
+    zone_name: string;
     comment: string | null;
 }

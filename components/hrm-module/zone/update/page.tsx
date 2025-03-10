@@ -50,8 +50,9 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
         const selectedDepot = zoneData.find((zone: any) => zone.depot_name === rowData.depot_name);
         form.reset({
             depot_name: selectedDepot ? selectedDepot.depot_id : "",
-            zone_name: rowData.zone_name,
+            zone_id: rowData.zone_id,
             zone_code: rowData.zone_code,
+            zone_name: rowData.zone_name,
             comment: rowData.comment || "",
         });
     }, [rowData, form, zoneData]);
@@ -147,6 +148,45 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
                                 )}
                             />
 
+                            {/* ZOne ID Field */}
+                            <FormField
+                                control={form.control}
+                                name="zone_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Zone Code
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter Zone ID"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Zone code Field */}
+                            <FormField
+                                control={form.control}
+                                name="zone_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Zone Code
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Enter Zone Code"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
                             {/* Zone Name Field */}
                             <FormField
@@ -161,26 +201,6 @@ const UpdateZoneDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }: U
                                             <Input
                                                 {...field}
                                                 placeholder="Enter a zone name"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Department Short Name Field */}
-                            <FormField
-                                control={form.control}
-                                name="zone_code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Zone Code
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter zone code"
                                             />
                                         </FormControl>
                                         <FormMessage />
