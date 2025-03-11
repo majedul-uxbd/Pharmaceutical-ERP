@@ -22,9 +22,10 @@ import * as z from "zod";
 interface CreateRegionProps {
     session: any;
     zoneData: any;
+    regionCount: any;
     onCreateSuccess(): void;
 }
-export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegionProps) {
+export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }: CreateRegionProps) {
 
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,8 +35,8 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             zone_name: "",
-            region_id: "",
-            region_code: "",
+            region_id: regionCount.region_id,
+            region_code: regionCount.region_code,
             region_name: "",
             comment: ""
         },
@@ -128,9 +129,18 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Region ID</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Region ID" />
-                                                </FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select Region ID" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value={regionCount.region_id}>
+                                                            {regionCount.region_id}
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -143,9 +153,18 @@ export function CreateRegion({ session, zoneData, onCreateSuccess }: CreateRegio
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Region Code</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Region Code" />
-                                                </FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select Region ID" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value={regionCount.region_code}>
+                                                            {regionCount.region_code}
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

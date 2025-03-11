@@ -34,6 +34,7 @@ import { CreateRegion } from "@/components/hrm-module/region/create/page";
 import DeactivateRegion from "@/components/hrm-module/region/deactivate/page";
 import ActivateRegion from "@/components/hrm-module/region/active/page";
 import UpdateRegionDialog from "@/components/hrm-module/region/update/page";
+import { Zone } from "@/interfaces/zone.interface";
 
 
 interface RegionTableProps {
@@ -54,8 +55,8 @@ const RegionTable = (session: RegionTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-    const [zoneData, setZoneData] = useState<Region[]>([]);
-
+    const [zoneData, setZoneData] = useState<Zone[]>([]);
+    const [regionCount, setRegionCount] = useState<any[]>([]);
 
     const columns: ColumnDef<Region>[] = [
         {
@@ -240,7 +241,7 @@ const RegionTable = (session: RegionTableProps) => {
         }))
     }, [pagination])
 
-    const getDepotInformation = async () => {
+    const getZoneInformation = async () => {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/common/get-zone`,
             {
@@ -266,9 +267,28 @@ const RegionTable = (session: RegionTableProps) => {
         // setButtonDisable(false);
     };
 
-    useEffect(() => {
-        getDepotInformation()
-    }, []);
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-region-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+
+        if (responseData.status === 'success') {
+            setRegionCount(() => responseData?.data)
+
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
     const regionTableData = async (paginationData: any) => {
         const response = await fetch(
@@ -301,7 +321,8 @@ const RegionTable = (session: RegionTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagination changed: Current value of pagination state: ", pagination);
+        getZoneInformation();
+        getCountInformation();
         regionTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -347,7 +368,9 @@ const RegionTable = (session: RegionTableProps) => {
                     <CreateRegion
                         session={session}
                         zoneData={zoneData}
+                        regionCount={regionCount}
                         onCreateSuccess={() => {
+                            getCountInformation();
                             regionTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,

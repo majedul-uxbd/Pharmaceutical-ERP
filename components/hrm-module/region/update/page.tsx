@@ -52,9 +52,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
         const selectedZone = zoneData.find((zone: any) => zone.zone_name === rowData.zone_name);
 
         form.reset({
-            zone_name: selectedZone ? selectedZone.zone_id : "", // Fix: Use zone_id
-            region_id: rowData.region_id,
-            region_code: rowData.region_code,
+            zone_name: selectedZone ? selectedZone.zone_id : "",
             region_name: rowData.region_name,
             comment: rowData.comment || "",
         });
@@ -109,7 +107,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                     <span>Update</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg h-[98vh]   p-6 rounded-xl shadow-2xl bg-white">
+            <DialogContent className="p-6 rounded-xl shadow-2xl bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-semibold text-center text-gray-800">
                         Update Region
@@ -123,7 +121,7 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                         onSubmit={form.handleSubmit(handleUpdateData)}
                         className="space-y-6"
                     >
-                        <div className="max-h-[70vh] space-y-4 overflow-y-auto">
+                        <div className="max-h-[70vh] space-y-4">
                             {/* Zone Name */}
                             <FormField
                                 control={form.control}
@@ -148,41 +146,6 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Region ID */}
-                            <FormField
-                                control={form.control}
-                                name="region_id"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Region ID</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} placeholder="Enter Region ID" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Region Code Field */}
-                            <FormField
-                                control={form.control}
-                                name="region_code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Region Code
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter region code"
-                                            />
-                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}

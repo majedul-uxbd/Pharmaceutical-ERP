@@ -11,7 +11,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateSchema } from "@/schema/zone.schema";
+import { CreateSchema } from "@/schema/market.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
 import { useState } from "react";
@@ -19,14 +19,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
-interface CreateZoneProps {
+interface CreateMarketProps {
     session: any;
-    depotData: any;
-    zoneCount: any;
+    regionData: any;
+    marketCount: any;
     onCreateSuccess(): void;
 }
-export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: CreateZoneProps) {
-
+export function CreateMarket({ session, regionData, marketCount, onCreateSuccess }: CreateMarketProps) {
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
@@ -34,20 +33,19 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
         defaultValues: {
-            depot_name: "",
-            zone_id: zoneCount.zone_id,
-            zone_code: zoneCount.zone_code,
-            zone_name: "",
+            region_name: "",
+            market_id: marketCount.market_id,
+            market_code: marketCount.market_code,
+            market_name: "",
             comment: ""
         },
     });
 
 
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
-
         setButtonDisable(true);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/add-zone`,
+            `${process.env.NEXT_PUBLIC_API_URL}/market/add-market`,
             {
                 method: 'POST',
                 headers: {
@@ -75,19 +73,19 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
             <DialogTrigger asChild>
                 <Button className="bg-green-800 hover:bg-green-900">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Zone</span>
+                    <span className="hidden sm:inline">Add Market</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                {depotData.length > 0 ? (
+                {regionData.length > 0 && marketCount !== undefined ? (
                     <>
                         {/* Header Section */}
                         <DialogHeader className="text-center">
                             <DialogTitle className="text-2xl font-semibold text-gray-800">
-                                Create Zone
+                                Create Market
                             </DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Fill in the details below to create a new depot.
+                                Fill in the details below to create a new market.
                             </DialogDescription>
                         </DialogHeader>
                         <Form {...form}>
@@ -96,23 +94,23 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    {/* Depot Name */}
+                                    {/* Region Name */}
                                     <FormField
                                         control={form.control}
-                                        name="depot_name"
+                                        name="region_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Depot Name</FormLabel>
+                                                <FormLabel>Region Name</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select a depot" />
+                                                            <SelectValue placeholder="Select a Region" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {depotData.map((depot: any) => (
-                                                            <SelectItem key={depot.id} value={depot.depot_id}>
-                                                                {depot.depot_name}
+                                                        {regionData.map((region: any) => (
+                                                            <SelectItem key={region.id} value={region.region_id}>
+                                                                {region.region_name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -122,22 +120,22 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         )}
                                     />
 
-                                    {/* Zone ID */}
+                                    {/* Market ID */}
                                     <FormField
                                         control={form.control}
-                                        name="zone_id"
+                                        name="market_id"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Zone ID</FormLabel>
+                                                <FormLabel>Market ID</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone ID" />
+                                                            <SelectValue placeholder="Select Market ID" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_id}>
-                                                            {zoneCount.zone_id}
+                                                        <SelectItem value={marketCount.market_id}>
+                                                            {marketCount.market_id}
                                                         </SelectItem>
                                                         {/* Add more options dynamically if needed */}
                                                     </SelectContent>
@@ -147,22 +145,22 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         )}
                                     />
 
-                                    {/* Zone Code */}
+                                    {/* Market Code */}
                                     <FormField
                                         control={form.control}
-                                        name="zone_code"
+                                        name="market_code"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Zone Code</FormLabel>
+                                                <FormLabel>Market Code</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone Code" />
+                                                            <SelectValue placeholder="Select Market Code" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_code}>
-                                                            {zoneCount.zone_code}
+                                                        <SelectItem value={marketCount.market_code}>
+                                                            {marketCount.market_code}
                                                         </SelectItem>
                                                         {/* Add more options dynamically if needed */}
                                                     </SelectContent>
@@ -172,15 +170,15 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         )}
                                     />
 
-                                    {/* Zone Name */}
+                                    {/* Market Name */}
                                     <FormField
                                         control={form.control}
-                                        name="zone_name"
+                                        name="market_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Zone Name</FormLabel>
+                                                <FormLabel>Market Name</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter Zone Name" />
+                                                    <Input {...field} placeholder="Enter Market Name" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

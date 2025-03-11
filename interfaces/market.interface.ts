@@ -1,18 +1,18 @@
-export interface Region {
+export interface Market {
     id: number;
-    zone_name: string;
-    region_id: string;
-    region_code: string;
     region_name: string;
+    market_id: string;
+    market_code: string;
+    market_name: string;
     comment: string | null;
-    region_status: number;
+    market_status: number;
     created_at: Date;
     modified_at: Date | null;
 }
 
-export interface UpdateRegion {
+export interface UpdateMarket {
     id: number;
-    zone_name: string;
     region_name: string;
+    market_name: string;
     comment: string | null;
 }

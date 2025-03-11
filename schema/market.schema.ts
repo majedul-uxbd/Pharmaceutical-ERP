@@ -1,34 +1,34 @@
 import * as z from 'zod';
 
 export const CreateSchema = z.object({
-    zone_name: z
-        .string()
-        .min(1, {
-            message: 'Zone name is required',
-        })
-        .max(100, {
-            message: 'Maximum 100 characters allowed',
-        }),
-    region_id: z
-        .string()
-        .min(1, {
-            message: 'Region ID is required',
-        })
-        .max(10, {
-            message: 'Maximum 10 characters allowed',
-        }),
-    region_code: z
-        .string()
-        .min(1, {
-            message: 'Region code is required',
-        })
-        .max(10, {
-            message: 'Maximum 10 characters allowed',
-        }),
     region_name: z
         .string()
         .min(1, {
             message: 'Region name is required',
+        })
+        .max(100, {
+            message: 'Maximum 100 characters allowed',
+        }),
+    market_id: z
+        .string()
+        .min(1, {
+            message: 'Market ID is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
+        }),
+    market_code: z
+        .string()
+        .min(1, {
+            message: 'Market code is required',
+        })
+        .max(10, {
+            message: 'Maximum 10 characters allowed',
+        }),
+    market_name: z
+        .string()
+        .min(1, {
+            message: 'Market name is required',
         })
         .max(100, {
             message: 'Maximum 100 characters allowed',
@@ -39,18 +39,18 @@ export const CreateSchema = z.object({
 });
 
 export const UpdateSchema = z.object({
-    zone_name: z
-        .string()
-        .min(1, {
-            message: 'Zone name is required',
-        })
-        .max(100, {
-            message: 'Maximum 100 characters allowed',
-        }),
     region_name: z
         .string()
         .min(1, {
             message: 'Region name is required',
+        })
+        .max(100, {
+            message: 'Maximum 100 characters allowed',
+        }),
+    market_name: z
+        .string()
+        .min(1, {
+            message: 'Market name is required',
         })
         .max(100, {
             message: 'Maximum 100 characters allowed',

@@ -26,17 +26,20 @@ import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UpdateZone } from "@/interfaces/zone.interface";
-import { UpdateSchema } from "@/schema/zone.schema";
+import { UpdateRegion } from "@/interfaces/region.interface";
+import { UpdateMarket } from "@/interfaces/market.interface";
+import { UpdateSchema } from "@/schema/market.schema";
 
-interface UpdateZoneDialogProps {
-    rowData: UpdateZone;
-    depotData: any;
+interface UpdateMarketDialogProps {
+    rowData: UpdateMarket;
+    regionData: any;
     accessToken: string;
     onUpdateSuccess: () => void;
 }
 
-const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: UpdateZoneDialogProps) => {
+const UpdateMarketDialog = ({ rowData, regionData, accessToken, onUpdateSuccess }: UpdateMarketDialogProps) => {
+
+
     const [isOpen, setIsOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -47,13 +50,15 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
     });
 
     useEffect(() => {
-        const selectedDepot = depotData.find((depot: any) => depot.depot_name === rowData.depot_name);
+        const selectedRegion = regionData.find((region: any) => region.region_name === rowData.region_name);
+
         form.reset({
-            depot_name: selectedDepot ? selectedDepot.depot_id : "",
-            zone_name: rowData.zone_name,
+            region_name: selectedRegion ? selectedRegion.region_id : "",
+            market_name: rowData.market_name,
             comment: rowData.comment || "",
         });
-    }, [rowData, form, depotData]);
+    }, [rowData, form, regionData]);
+
 
 
     const handleUpdateData = async (values: z.infer<typeof UpdateSchema>) => {
@@ -61,7 +66,7 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
         try {
             setButtonDisable(true)
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/zone/update`,
+                `${process.env.NEXT_PUBLIC_API_URL}/market/update`,
                 {
                     method: 'POST',
                     headers: {
@@ -87,6 +92,7 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
             setButtonDisable(false)
             console.error("file: register-form.tsx:67 ~ onSubmit ~ error:", error);
         }
+
     };
 
 
@@ -105,10 +111,10 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
             <DialogContent className="p-6 rounded-xl shadow-2xl bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-semibold text-center text-gray-800">
-                        Update Department
+                        Update Market
                     </DialogTitle>
                     <DialogDescription className="text-center text-gray-500">
-                        Update Department Information
+                        Update Market Information
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -117,26 +123,26 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
                         className="space-y-6"
                     >
                         <div className="max-h-[70vh] space-y-4">
-                            {/* Depot Name */}
+                            {/* region Name */}
                             <FormField
                                 control={form.control}
-                                name="depot_name"
+                                name="region_name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Depot Name</FormLabel>
+                                        <FormLabel>Region Name</FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
-                                            value={field.value || ""}
+                                            value={field.value ? String(field.value) : ""}
                                         >
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select a depot" />
+                                                    <SelectValue placeholder="Select a region" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {depotData.map((depot: any) => (
-                                                    <SelectItem key={depot.id} value={depot.depot_id}>
-                                                        {depot.depot_name}
+                                                {regionData.map((region: any) => (
+                                                    <SelectItem key={region.id} value={String(region.region_id)}>
+                                                        {region.region_name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -146,19 +152,19 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
                                 )}
                             />
 
-                            {/* Zone Name Field */}
+                            {/* Market Name Field */}
                             <FormField
                                 control={form.control}
-                                name="zone_name"
+                                name="market_name"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Zone Name
+                                            Market Name
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="Enter a depot name"
+                                                placeholder="Enter Market Name"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -215,4 +221,4 @@ const UpdateZoneDialog = ({ rowData, depotData, accessToken, onUpdateSuccess }: 
     );
 };
 
-export default UpdateZoneDialog;
+export default UpdateMarketDialog;

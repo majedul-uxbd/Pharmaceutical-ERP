@@ -53,6 +53,7 @@ const ZoneTable = (session: ZoneTableProps) => {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
     const [depotData, setDepotData] = useState<Zone[]>([]);
+    const [zoneCount, setZoneCount] = useState<any[]>([]);
 
 
     const columns: ColumnDef<Zone>[] = [
@@ -212,6 +213,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                     depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
+                                        getCountInformation();
                                         zoneTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
@@ -264,9 +266,28 @@ const ZoneTable = (session: ZoneTableProps) => {
         // setButtonDisable(false);
     };
 
-    useEffect(() => {
-        getDepotInformation()
-    }, []);
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+
+        if (responseData.status === 'success') {
+            setZoneCount(() => responseData?.data)
+
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
     const zoneTableData = async (paginationData: any) => {
         const response = await fetch(
@@ -299,7 +320,8 @@ const ZoneTable = (session: ZoneTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagination changed: Current value of pagination state: ", pagination);
+        getDepotInformation();
+        getCountInformation();
         zoneTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -345,7 +367,9 @@ const ZoneTable = (session: ZoneTableProps) => {
                     <CreateZone
                         session={session}
                         depotData={depotData}
+                        zoneCount={zoneCount}
                         onCreateSuccess={() => {
+                            getCountInformation();
                             zoneTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
