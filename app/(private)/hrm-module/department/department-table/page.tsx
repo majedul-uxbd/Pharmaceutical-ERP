@@ -87,18 +87,41 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         },
 
         {
+            accessorKey: "department_name",
+            header: "Department Name",
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('department_name')?.getFilterValue() as string) || "";
+                const departmentName = row.getValue("department_name") as string;
+
+                if (filterValue && departmentName.toLowerCase().includes(filterValue.toLowerCase())) {
+                    // Highlight matching text using regex
+                    const parts = departmentName.split(new RegExp(`(${filterValue})`, "gi"));
+
+                    return (
+                        <div className="whitespace-nowrap text-slate-700">
+                            {parts.map((part, index) => (
+                                <span
+                                    key={index}
+                                    className={
+                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
+                                    }
+                                >
+                                    {part}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return <div className="whitespace-nowrap text-slate-700">{departmentName}</div>;
+            },
+        },
+
+        {
             accessorKey: "department_code",
             header: "Department Code",
             cell: ({ row }) => (
                 <div className="whitespace-nowrap text-slate-700">{row.getValue("department_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "department_name",
-            header: "Department Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("department_name")}</div>
             ),
         },
 

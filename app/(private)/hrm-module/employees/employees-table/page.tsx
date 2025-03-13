@@ -95,9 +95,32 @@ const EmployeesTable = (session: EmployeesTableProps) => {
         {
             accessorKey: "full_name",
             header: "Full Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("full_name")}</div>
-            ),
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('full_name')?.getFilterValue() as string) || "";
+                const fullName = row.getValue("full_name") as string;
+
+                if (filterValue && fullName.toLowerCase().includes(filterValue.toLowerCase())) {
+                    // Highlight matching text using regex
+                    const parts = fullName.split(new RegExp(`(${filterValue})`, "gi"));
+
+                    return (
+                        <div className="whitespace-nowrap text-slate-700">
+                            {parts.map((part, index) => (
+                                <span
+                                    key={index}
+                                    className={
+                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
+                                    }
+                                >
+                                    {part}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return <div className="whitespace-nowrap text-slate-700">{fullName}</div>;
+            },
         },
 
         {

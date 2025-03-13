@@ -95,18 +95,41 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
+            accessorKey: "designation_name",
+            header: "Designation Name",
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('designation_name')?.getFilterValue() as string) || "";
+                const designationName = row.getValue("designation_name") as string;
+
+                if (filterValue && designationName.toLowerCase().includes(filterValue.toLowerCase())) {
+                    // Highlight matching text using regex
+                    const parts = designationName.split(new RegExp(`(${filterValue})`, "gi"));
+
+                    return (
+                        <div className="whitespace-nowrap text-slate-700">
+                            {parts.map((part, index) => (
+                                <span
+                                    key={index}
+                                    className={
+                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
+                                    }
+                                >
+                                    {part}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return <div className="whitespace-nowrap text-slate-700">{designationName}</div>;
+            },
+        },
+
+        {
             accessorKey: "designation_code",
             header: "Designation Code",
             cell: ({ row }) => (
                 <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "designation_name",
-            header: "Designation Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_name")}</div>
             ),
         },
 
