@@ -39,7 +39,7 @@ const ProfileCard = ({ session }: any) => {
       );
       if (response.ok) {
         const responseData = await response.json();
-        console.warn('🚀 ~ getModule ~ data:', responseData.data);
+        // console.warn('🚀 ~ getModule ~ data:', responseData.data);
         // setTotalPage(() => pageCount);
         setUser(() => responseData.data);
         setIsLoading(false);
@@ -63,7 +63,7 @@ const ProfileCard = ({ session }: any) => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <div className="flex w-full flex-col justify-between">
         <div className='shadow-slate-100" flex w-full flex-col items-center justify-start rounded-md border border-opacity-20 md:flex-row'>
           <div className="m-5 flex items-center justify-start">
@@ -248,6 +248,18 @@ const ProfileCard = ({ session }: any) => {
                     <span className="text-sm font-medium leading-none text-muted-foreground">
                       {' '}
                       {user.nid_no || "N/A"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mb-4 flex flex-col gap-2">
+                  <p>
+                    <span className="text-sm font-medium leading-none">
+                      Module Name :
+                    </span>
+                    <span className="text-sm font-medium leading-none text-muted-foreground">
+                      {' '}
+                      {user.module_name || "N/A"}
                     </span>
                   </p>
                 </div>

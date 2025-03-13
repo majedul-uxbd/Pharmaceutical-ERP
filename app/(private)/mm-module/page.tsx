@@ -1,5 +1,9 @@
 import { auth } from "@/auth";
+import { Button } from "@/components/ui/button";
+import { ModuleInfo } from "@/utilities/module.enum";
 import { Metadata } from "next";
+import Link from "next/link";
+import MmDashboard from "./mm-dashboard/page";
 
 export const metadata: Metadata = {
     title: "Material Management System",
@@ -9,9 +13,28 @@ export const metadata: Metadata = {
 const MaterialManagement = async () => {
     const session = await auth();
 
-    return (
-        <div>Material Management</div>
-    );
+    if (session?.user.module_id !== ModuleInfo[0].value) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <div className="text-center p-6 bg-white border border-red-200 shadow-lg shadow-red-100 rounded-2xl">
+                    <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
+                    <p className="text-gray-600 mt-2">You do not have permission to view this page.</p>
+                    <Link href="/" passHref>
+                        <Button className="mt-4">
+                            Back to Home
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+    else {
+        return (
+            <div>
+                <MmDashboard session={session?.user} />
+            </div>
+        );
+    }
 }
 
 export default MaterialManagement;

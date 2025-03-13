@@ -2,11 +2,14 @@
 
 import {
   BriefcaseBusiness,
+  ChevronRight,
   LayoutDashboard,
   MenuIcon,
   Presentation,
+  Settings2,
   Speech,
   Users2Icon,
+  UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -22,6 +25,9 @@ import { SidebarFooter } from "../ui/sidebar";
 import { NavUser } from "./nav-user";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { ModuleInfo } from "@/utilities/module.enum";
 
 interface SidebarPageProps {
   session: any;
@@ -100,129 +106,129 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
               <MenuIcon className="ml-2 size-6" />
             </MenuItem>
 
-            {["system_admin", "exhibitor_admin", "exhibitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/dashboard" />}
-                className={cn(isActiveRoute("/dashboard") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <LayoutDashboard className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Dashboard
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Dashboard
-              </MenuItem>
-            )}
+            {(session?.module_id === ModuleInfo[2].value) && (
+              <>
+                {/* Dashboard Menu Item */}
+                <MenuItem
+                  component={<Link href="/hrm-module" />}
+                  className={cn(isActiveRoute("/hrm-module") && "bg-slate-100")}
+                  icon={
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <LayoutDashboard className="size-5" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          align="center"
+                          className="ml-8 bg-black text-white border p-2"
+                        >
+                          Dashboard
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  }
+                >
+                  Dashboard
+                </MenuItem>
 
-            {["system_admin", "exhibitor_admin", "exhibitor", "visitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/exhibition" />}
-                className={cn(isActiveRoute("/exhibition") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Presentation className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Exhibitions
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Exhibitions
-              </MenuItem>
-            )}
+                <DropdownMenu >
+                  <DropdownMenuTrigger asChild>
+                    <MenuItem
+                      className="cursor-pointer"
+                      icon={
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Settings2 className="size-5" />
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="right"
+                              align="center"
+                              className="ml-8 bg-black text-white border p-2"
+                            >
+                              Setup
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      }
+                    >
+                      <div className="flex w-full justify-between items-center">
+                        <span>Setup</span>
+                        <ChevronRight className="size-4 text-muted-foreground" />
+                      </div>
+                    </MenuItem>
+                  </DropdownMenuTrigger>
 
-            {["system_admin", "exhibitor_admin", "exhibitor"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/exhibitors" />}
-                className={cn(isActiveRoute("/exhibitors") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Users2Icon className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Exhibitors
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Exhibitors
-              </MenuItem>
-            )}
+                  <DropdownMenuContent
+                    className="w-52 bg-white border shadow-md rounded-md overflow-hidden"
+                    align="start"
+                    side="right" // Opens from the right side
+                  >
+                    <div>
 
-            {["system_admin"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/company" />}
-                className={cn(isActiveRoute("/company") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <BriefcaseBusiness className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Company
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Company
-              </MenuItem>
-            )}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className={cn(isActiveRoute("/hrm-module/department") && "bg-slate-100 cursor-pointer")}
+                          href="/hrm-module/department">Department
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className={cn(isActiveRoute("/hrm-module/designation") && "bg-slate-100 cursor-pointer")}
+                          href="/hrm-module/designation">Designation
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className={cn(isActiveRoute("/hrm-module/zone") && "bg-slate-100 cursor-pointer")}
+                          href="/hrm-module/zone">Zone
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className={cn(isActiveRoute("/hrm-module/region") && "bg-slate-100 cursor-pointer")}
+                          href="/hrm-module/region">Region
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className={cn(isActiveRoute("/hrm-module/market") && "bg-slate-100 cursor-pointer")}
+                          href="/hrm-module/market">Market
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-            {["system_admin"].includes(session?.role) && (
-              <MenuItem
-                component={<Link href="/volunteer" />}
-                className={cn(isActiveRoute("/volunteer") && "bg-slate-100")}
-                icon={
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Speech className="size-5" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="ml-8 text-black bg-white border p-2"
-                      >
-                        Volunteers
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                }
-              >
-                Volunteers
-              </MenuItem>
+                {/* Employees Menu Item */}
+                <MenuItem
+                  component={<Link href="/hrm-module/employees" />}
+                  className={cn(isActiveRoute("/hrm-module/employees") && "bg-slate-100")}
+                  icon={
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <UsersRound className="size-5" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          align="center"
+                          className="ml-8 bg-black text-white border p-2"
+                        >
+                          Employees
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  }
+                >
+                  Employees
+                </MenuItem>
+              </>
             )}
           </Menu>
 

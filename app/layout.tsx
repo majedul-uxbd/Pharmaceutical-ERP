@@ -36,12 +36,12 @@ export default async function RootLayout({
       >
         {session ? (
           <div className="flex w-full flex-col flex-nowrap" >
-            <div className="fixed  top-0 left-0 right-0 z-0">
+            <div className="fixed  top-0 left-0 right-0 z-50">
               <Header session={session} />
             </div>
             <div className="flex w-full flex-1">
               <SidebarPage session={session?.user} />
-              <main className="flex-1 w-full mx-4 my-16 overflow-hidden">
+              <main className="flex-1 w-full mx-4 h-[calc(100%-125px)] my-16 overflow-hidden">
                 {children}
                 <Toaster position="bottom-center" richColors expand={false} />
               </main>
@@ -57,7 +57,7 @@ export default async function RootLayout({
             </div>
             <div className="flex w-full flex-1">
               {/* <SidebarPage session={session?.user} /> */}
-              <main className="flex-1 w-full mx-4 my-16 overflow-hidden">
+              <main className="flex-1 w-full mx-4 my-10 overflow-hidden">
                 {children}
                 <Toaster position="bottom-center" richColors expand={false} />
               </main>
