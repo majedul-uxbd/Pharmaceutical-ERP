@@ -11,41 +11,43 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateSchema } from "@/schema/market.schema";
+import { CreateSchema } from "@/schema/region.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
-interface CreateMarketProps {
+interface CreateRegionProps {
     session: any;
-    regionData: any;
-    marketCount: any;
+    zoneData: any;
+    regionCount: any;
     onCreateSuccess(): void;
 }
-export function CreateMarket({ session, regionData, marketCount, onCreateSuccess }: CreateMarketProps) {
-    const authToken = session?.id;
+export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }: CreateRegionProps) {
+
+    const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
         defaultValues: {
+            zone_name: "",
+            region_id: regionCount.region_id,
+            region_code: regionCount.region_code,
             region_name: "",
-            market_id: marketCount.market_id,
-            market_code: marketCount.market_code,
-            market_name: "",
             comment: ""
         },
     });
 
 
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
+
         setButtonDisable(true);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/market/add-market`,
+            `${process.env.NEXT_PUBLIC_API_URL}/region/add-region`,
             {
                 method: 'POST',
                 headers: {
@@ -73,19 +75,19 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
             <DialogTrigger asChild>
                 <Button className="bg-green-800 hover:bg-green-900">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Market</span>
+                    <span className="hidden sm:inline">Add Region</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                {regionData.length > 0 && marketCount !== undefined ? (
+                {zoneData.length > 0 ? (
                     <>
                         {/* Header Section */}
                         <DialogHeader className="text-center">
                             <DialogTitle className="text-2xl font-semibold text-gray-800">
-                                Create Market
+                                Create Region
                             </DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Fill in the details below to create a new market.
+                                Fill in the details below to create a new region.
                             </DialogDescription>
                         </DialogHeader>
                         <Form {...form}>
@@ -94,23 +96,23 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    {/* Region Name */}
+                                    {/* Zone Name */}
                                     <FormField
                                         control={form.control}
-                                        name="region_name"
+                                        name="zone_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Region Name</FormLabel>
+                                                <FormLabel>Zone Name</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select a Region" />
+                                                            <SelectValue placeholder="Select a Zone" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {regionData.map((region: any) => (
-                                                            <SelectItem key={region.id} value={region.region_id}>
-                                                                {region.region_name}
+                                                        {zoneData.map((zone: any) => (
+                                                            <SelectItem key={zone.id} value={zone.zone_id}>
+                                                                {zone.zone_name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -120,24 +122,23 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                         )}
                                     />
 
-                                    {/* Market ID */}
+                                    {/* Region ID */}
                                     <FormField
                                         control={form.control}
-                                        name="market_id"
+                                        name="region_id"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Market ID</FormLabel>
+                                                <FormLabel>Region ID</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select Market ID" />
+                                                            <SelectValue placeholder="Select Region ID" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value={marketCount.market_id}>
-                                                            {marketCount.market_id}
+                                                        <SelectItem value={regionCount.region_id}>
+                                                            {regionCount.region_id}
                                                         </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -145,24 +146,23 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                         )}
                                     />
 
-                                    {/* Market Code */}
+                                    {/* Region Code */}
                                     <FormField
                                         control={form.control}
-                                        name="market_code"
+                                        name="region_code"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Market Code</FormLabel>
+                                                <FormLabel>Region Code</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select Market Code" />
+                                                            <SelectValue placeholder="Select Region ID" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value={marketCount.market_code}>
-                                                            {marketCount.market_code}
+                                                        <SelectItem value={regionCount.region_code}>
+                                                            {regionCount.region_code}
                                                         </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -170,15 +170,15 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                         )}
                                     />
 
-                                    {/* Market Name */}
+                                    {/* Region Name */}
                                     <FormField
                                         control={form.control}
-                                        name="market_name"
+                                        name="region_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Market Name</FormLabel>
+                                                <FormLabel>Region Name</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter Market Name" />
+                                                    <Input {...field} placeholder="Enter Region Name" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

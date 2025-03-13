@@ -84,18 +84,18 @@ const RegionTable = (session: RegionTableProps) => {
         },
 
         {
-            accessorKey: "region_name",
-            header: "Region Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
-            ),
-        },
-
-        {
             accessorKey: "region_id",
             header: "Region ID",
             cell: ({ row }) => (
                 <div className="whitespace-nowrap text-slate-700">{row.getValue("region_id")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "region_name",
+            header: "Region Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
             ),
         },
 
@@ -110,9 +110,32 @@ const RegionTable = (session: RegionTableProps) => {
         {
             accessorKey: "zone_name",
             header: "Zone Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_name")}</div>
-            ),
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('zone_name')?.getFilterValue() as string) || "";
+                const zoneName = row.getValue("zone_name") as string;
+
+                if (filterValue && zoneName.toLowerCase().includes(filterValue.toLowerCase())) {
+                    // Highlight matching text using regex
+                    const parts = zoneName.split(new RegExp(`(${filterValue})`, "gi"));
+
+                    return (
+                        <div className="whitespace-nowrap text-slate-700">
+                            {parts.map((part, index) => (
+                                <span
+                                    key={index}
+                                    className={
+                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
+                                    }
+                                >
+                                    {part}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return <div className="whitespace-nowrap text-slate-700">{zoneName}</div>;
+            },
         },
 
         {
@@ -355,12 +378,12 @@ const RegionTable = (session: RegionTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full md:w-3/5"
-                        placeholder="Filter by Department Name..."
+                        placeholder="Filter by Zone Name..."
                         value={(
-                            table.getColumn('region_name')?.getFilterValue() as string
+                            table.getColumn('zone_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('region_name')?.setFilterValue(event.target.value)
+                            table.getColumn('zone_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
@@ -413,7 +436,7 @@ const RegionTable = (session: RegionTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('zone_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">

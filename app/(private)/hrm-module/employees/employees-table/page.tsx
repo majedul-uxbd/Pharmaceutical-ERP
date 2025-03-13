@@ -29,19 +29,22 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } fr
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zone } from "@/interfaces/zone.interface";
 import { CreateZone } from "@/components/hrm-module/zone/create/page";
 import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
 import ActivateZone from "@/components/hrm-module/zone/active/page";
 import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
+import { Employees } from "@/interfaces/employees.interface";
+import ActivateEmployee from "@/components/hrm-module/employees/active/page";
+import DeactivateEmployee from "@/components/hrm-module/employees/deactivate/page";
 
-interface ZoneTableProps {
+
+interface EmployeesTableProps {
     session: any;
 }
 
-const ZoneTable = (session: ZoneTableProps) => {
+const EmployeesTable = (session: EmployeesTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Zone[]>([]);
+    const [data, setData] = useState<Employees[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -52,11 +55,11 @@ const ZoneTable = (session: ZoneTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-    const [depotData, setDepotData] = useState<Zone[]>([]);
+    // const [depotData, setDepotData] = useState<Zone[]>([]);
     const [zoneCount, setZoneCount] = useState<any[]>([]);
 
 
-    const columns: ColumnDef<Zone>[] = [
+    const columns: ColumnDef<Employees>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -82,65 +85,118 @@ const ZoneTable = (session: ZoneTableProps) => {
         },
 
         {
-            accessorKey: "zone_id",
-            header: "Zone ID",
+            accessorKey: "employee_id",
+            header: "Employee ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_id")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("employee_id")}</div>
             ),
         },
 
         {
-            accessorKey: "zone_name",
-            header: "Zone Name",
+            accessorKey: "full_name",
+            header: "Full Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_name")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("full_name")}</div>
             ),
         },
 
         {
-            accessorKey: "zone_code",
-            header: "Zone Code",
+            accessorKey: "email",
+            header: "Email",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_code")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.original.email ? row.original.email : ""}</div>
+            ),
+        },
+
+        {
+            accessorKey: "contact",
+            header: "Contact",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("contact")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "present_address",
+            header: "Present Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("present_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_address",
+            header: "Permanent Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("permanent_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "joining_date",
+            header: "Joining Date",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.original.joining_date
+                    ? format(new Date(row.original.joining_date), 'yyyy-MM-dd')
+                    : 'N/A'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "posting_place",
+            header: "Posting Place",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("posting_place")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_date",
+            header: "Permanent Date",
+            cell: ({ row }) => (
+                <div className={row.original.permanent_date ? "text-slate-700" : "whitespace-nowrap bg-yellow-300 text-slate-700 font-bold border p-1"}>{row.original.permanent_date
+                    ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
+                    : 'Temporary Employee'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "designation_name",
+            header: "Designation Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "department_name",
+            header: "Department Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("department_name")}</div>
             ),
         },
 
         {
             accessorKey: "depot_name",
-            header: "Depot Name",
-            cell: ({ row }) => {
-                const filterValue = (table.getColumn('depot_name')?.getFilterValue() as string) || "";
-                const depotName = row.getValue("depot_name") as string;
-
-                if (filterValue && depotName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = depotName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{depotName}</div>;
-            },
+            header: "Deport Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("depot_name")}</div>
+            ),
         },
 
         {
-            accessorKey: "zone_status",
+            accessorKey: "module_name",
+            header: "Module Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("module_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "employee_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("zone_status") === 1;
+                const isActive = row.getValue("employee_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -150,13 +206,6 @@ const ZoneTable = (session: ZoneTableProps) => {
                     </Badge>
                 );
             },
-        },
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
-            ),
         },
 
         {
@@ -184,7 +233,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.zone_status === 1;
+                const isActive = row.original.employee_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -200,11 +249,11 @@ const ZoneTable = (session: ZoneTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateZone
+                                    <DeactivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            zoneTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -215,11 +264,11 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateZone
+                                    <ActivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            zoneTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -230,7 +279,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 </div>
                             )}
 
-                            <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                            {/* <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
                                 <UpdateZoneDialog
                                     rowData={row.original}
                                     depotData={depotData}
@@ -245,7 +294,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                         });
                                     }}
                                 />
-                            </div>
+                            </div> */}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -263,58 +312,58 @@ const ZoneTable = (session: ZoneTableProps) => {
         }))
     }, [pagination])
 
-    const getDepotInformation = async () => {
+    // const getDepotInformation = async () => {
+    //     const response = await fetch(
+    //         `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 Authorization: `Bearer ${accessToken}`,
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         }
+    //     );
+
+    //     const responseData = await response.json();
+    //     // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
+
+    //     if (responseData.status === 'success') {
+    //         setDepotData(() => responseData?.data)
+    //         setIsLoading(false);
+
+    //     } else {
+    //         setIsLoading(true);
+    //         console.error(responseData.message);
+    //     }
+    //     // setButtonDisable(false);
+    // };
+
+    // const getCountInformation = async () => {
+    //     const response = await fetch(
+    //         `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 Authorization: `Bearer ${accessToken}`,
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         }
+    //     );
+
+    //     const responseData = await response.json();
+    //     // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+
+    //     if (responseData.status === 'success') {
+    //         setZoneCount(() => responseData?.data)
+
+    //     } else {
+    //         console.error(responseData.message);
+    //     }
+    // };
+
+    const employeeTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const responseData = await response.json();
-        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
-
-        if (responseData.status === 'success') {
-            setDepotData(() => responseData?.data)
-            setIsLoading(false);
-
-        } else {
-            setIsLoading(true);
-            console.error(responseData.message);
-        }
-        // setButtonDisable(false);
-    };
-
-    const getCountInformation = async () => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const responseData = await response.json();
-        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
-
-        if (responseData.status === 'success') {
-            setZoneCount(() => responseData?.data)
-
-        } else {
-            console.error(responseData.message);
-        }
-    };
-
-    const zoneTableData = async (paginationData: any) => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/get-zone-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/employees/get-employees-data`,
             {
                 method: 'POST',
                 headers: {
@@ -330,10 +379,10 @@ const ZoneTable = (session: ZoneTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            const zoneData = responseData?.data?.data as Zone[];
+            const employeeData = responseData?.data?.data as Employees[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             setTotalPage(() => pageCount);
-            setData(() => zoneData)
+            setData(() => employeeData)
             setIsLoading(false)
         }
         else {
@@ -343,9 +392,9 @@ const ZoneTable = (session: ZoneTableProps) => {
     }
 
     useEffect(() => {
-        getDepotInformation();
-        getCountInformation();
-        zoneTableData({
+        // getDepotInformation();
+        // getCountInformation();
+        employeeTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -377,16 +426,16 @@ const ZoneTable = (session: ZoneTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full md:w-3/5"
-                        placeholder="Filter by Depot Name..."
+                        placeholder="Filter by Department Name..."
                         value={(
-                            table.getColumn('depot_name')?.getFilterValue() as string
+                            table.getColumn('full_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('depot_name')?.setFilterValue(event.target.value)
+                            table.getColumn('full_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
-                <div className="">
+                {/* <div className="">
                     <CreateZone
                         session={session}
                         depotData={depotData}
@@ -401,7 +450,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                             });
                         }}
                     />
-                </div>
+                </div> */}
             </div>
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
@@ -435,7 +484,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('depot_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('full_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
@@ -534,4 +583,4 @@ const ZoneTable = (session: ZoneTableProps) => {
     )
 }
 
-export default ZoneTable;
+export default EmployeesTable;

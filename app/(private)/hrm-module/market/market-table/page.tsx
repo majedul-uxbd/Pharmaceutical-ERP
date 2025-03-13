@@ -88,18 +88,18 @@ const MarketTable = (session: MarketTableProps) => {
         },
 
         {
-            accessorKey: "market_name",
-            header: "Market Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_name")}</div>
-            ),
-        },
-
-        {
             accessorKey: "market_id",
             header: "Market ID",
             cell: ({ row }) => (
                 <div className="whitespace-nowrap text-slate-700">{row.getValue("market_id")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "market_name",
+            header: "Market Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_name")}</div>
             ),
         },
 
@@ -114,9 +114,32 @@ const MarketTable = (session: MarketTableProps) => {
         {
             accessorKey: "region_name",
             header: "Region Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
-            ),
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('region_name')?.getFilterValue() as string) || "";
+                const regionName = row.getValue("region_name") as string;
+
+                if (filterValue && regionName.toLowerCase().includes(filterValue.toLowerCase())) {
+                    // Highlight matching text using regex
+                    const parts = regionName.split(new RegExp(`(${filterValue})`, "gi"));
+
+                    return (
+                        <div className="whitespace-nowrap text-slate-700">
+                            {parts.map((part, index) => (
+                                <span
+                                    key={index}
+                                    className={
+                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
+                                    }
+                                >
+                                    {part}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+
+                return <div className="whitespace-nowrap text-slate-700">{regionName}</div>;
+            },
         },
 
         {
@@ -236,14 +259,13 @@ const MarketTable = (session: MarketTableProps) => {
 
     ]
 
-    const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
-        const factor = btnType === "next" ? 1 : -1;
+    const handlePaginationState = useCallback((btnType: "prev" | "next") => {
+        setPagination((prev) => {
+            const newIndex = btnType === "next" ? prev.pageIndex + 1 : Math.max(0, prev.pageIndex - 1);
+            return { ...prev, pageIndex: newIndex };
+        });
+    }, []);
 
-        setPagination((prev) => ({
-            ...prev,
-            pageIndex: prev.pageIndex + factor
-        }))
-    }, [pagination])
 
     const getRegionInformation = async () => {
         const response = await fetch(
@@ -309,7 +331,11 @@ const MarketTable = (session: MarketTableProps) => {
         if (response.ok) {
             const responseData = await response.json();
             const regionData = responseData?.data?.data as Market[];
-            const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
+            const pageSize = pagination.pageSize || 10; // Default to 10 if pageSize is undefined
+            const pageCount = responseData?.data?.metadata?.totalRows
+                ? Math.ceil(responseData.data.metadata.totalRows / pageSize)
+                : 1;
+            setTotalPage(pageCount);
             setTotalPage(() => pageCount);
             setData(() => regionData)
             setIsLoading(false)
@@ -349,18 +375,19 @@ const MarketTable = (session: MarketTableProps) => {
             rowSelection,
         },
     })
+
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
                         className="w-full md:w-3/5"
-                        placeholder="Filter by Department Name..."
+                        placeholder="Filter by Region Name..."
                         value={(
-                            table.getColumn('market_name')?.getFilterValue() as string
+                            table.getColumn('region_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('market_name')?.setFilterValue(event.target.value)
+                            table.getColumn('region_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
@@ -413,7 +440,7 @@ const MarketTable = (session: MarketTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('market_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
