@@ -458,10 +458,10 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                         }
                     />
                 </div>
-                {/* <div className="">
+                <div className="">
                     <CreateZone
                         session={session}
-                        depotData={depotData}
+                        // depotData={depotData}
                         zoneCount={zoneCount}
                         onCreateSuccess={() => {
                             getCountInformation();
@@ -473,7 +473,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                             });
                         }}
                     />
-                </div> */}
+                </div>
             </div>
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">

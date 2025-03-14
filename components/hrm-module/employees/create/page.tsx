@@ -19,13 +19,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
-interface CreateRegionProps {
+interface CreateEmployeeProps {
     session: any;
     zoneData: any;
     regionCount: any;
     onCreateSuccess(): void;
 }
-export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }: CreateRegionProps) {
+const CreateEmployee = ({ session, zoneData, regionCount, onCreateSuccess }: CreateEmployeeProps) => {
 
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -234,3 +234,5 @@ export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }
         </Dialog>
     );
 }
+
+export default CreateEmployee;

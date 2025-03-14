@@ -59,7 +59,7 @@ const DesignationTable = (session: DesignationTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-
+    const [designationCount, setDesignationCount] = useState<any[]>([]);
 
     const columns: ColumnDef<Designation>[] = [
         {
@@ -278,6 +278,29 @@ const DesignationTable = (session: DesignationTableProps) => {
         }))
     }, [pagination])
 
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-designation-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+
+        if (responseData.status === 'success') {
+            setDesignationCount(() => responseData?.data)
+
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
     const designationTableData = async (paginationData: any) => {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/designation/get-designation-data`,
@@ -311,6 +334,7 @@ const DesignationTable = (session: DesignationTableProps) => {
     }
 
     useEffect(() => {
+        getCountInformation();
         designationTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -355,7 +379,9 @@ const DesignationTable = (session: DesignationTableProps) => {
                 <div className="">
                     <CreateDesignation
                         session={session}
+                        designationCount={designationCount}
                         onCreateSuccess={() => {
+                            getCountInformation();
                             designationTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,

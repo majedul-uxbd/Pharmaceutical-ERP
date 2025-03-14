@@ -52,6 +52,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
+    const [deptCount, setDeptCount] = useState<any[]>([]);
 
 
     const columns: ColumnDef<Department>[] = [
@@ -265,6 +266,26 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }))
     }, [pagination])
 
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-department-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        if (responseData.status === 'success') {
+            setDeptCount(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
     const departmentTableData = async (paginationData: any) => {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
@@ -296,7 +317,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagination changed: Current value of pagination state: ", pagination);
+        getCountInformation();
         departmentTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -341,7 +362,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                 <div className="">
                     <CreateDepartment
                         session={session}
+                        deptCount={deptCount}
                         onCreateSuccess={() => {
+                            getCountInformation();
                             departmentTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
