@@ -36,6 +36,8 @@ import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
 import { Employees } from "@/interfaces/employees.interface";
 import ActivateEmployee from "@/components/hrm-module/employees/active/page";
 import DeactivateEmployee from "@/components/hrm-module/employees/deactivate/page";
+import { Depot } from "@/interfaces/depot.interface";
+import CreateEmployee from "@/components/hrm-module/employees/create/page";
 
 
 interface EmployeesTableProps {
@@ -55,8 +57,12 @@ const EmployeesTable = (session: EmployeesTableProps) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-    // const [depotData, setDepotData] = useState<Zone[]>([]);
-    const [zoneCount, setZoneCount] = useState<any[]>([]);
+    const [moduleData, setModuleData] = useState<any[]>([]);
+    const [departmentData, setDepartmentData] = useState<any[]>([]);
+    const [designationData, setDesignationData] = useState<any[]>([]);
+    const [depotData, setDepotData] = useState<Depot[]>([]);
+    const [idCount, setIdCount] = useState<any[]>([]);
+    const [postingData, setPostingData] = useState<any[]>([]);
 
 
     const columns: ColumnDef<Employees>[] = [
@@ -335,54 +341,131 @@ const EmployeesTable = (session: EmployeesTableProps) => {
         }))
     }, [pagination])
 
-    // const getDepotInformation = async () => {
-    //     const response = await fetch(
-    //         `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
-    //         {
-    //             method: 'GET',
-    //             headers: {
-    //                 Authorization: `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         }
-    //     );
+    const getModuleInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-module`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
-    //     const responseData = await response.json();
-    //     // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getModuleInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setModuleData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
-    //     if (responseData.status === 'success') {
-    //         setDepotData(() => responseData?.data)
-    //         setIsLoading(false);
+    const getDesignationInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-designation`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
-    //     } else {
-    //         setIsLoading(true);
-    //         console.error(responseData.message);
-    //     }
-    //     // setButtonDisable(false);
-    // };
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDesignationInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDesignationData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
-    // const getCountInformation = async () => {
-    //     const response = await fetch(
-    //         `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
-    //         {
-    //             method: 'GET',
-    //             headers: {
-    //                 Authorization: `Bearer ${accessToken}`,
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         }
-    //     );
+    const getPostingInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-posting`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
-    //     const responseData = await response.json();
-    //     // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getPostingInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setPostingData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
-    //     if (responseData.status === 'success') {
-    //         setZoneCount(() => responseData?.data)
+    const getDepartmentInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-department`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
-    //     } else {
-    //         console.error(responseData.message);
-    //     }
-    // };
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepartmentInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepartmentData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getDepotInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepotData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-employee-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setIdCount(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
     const employeeTableData = async (paginationData: any) => {
         const response = await fetch(
@@ -399,7 +482,6 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             },
         );
 
-
         if (response.ok) {
             const responseData = await response.json();
             const employeeData = responseData?.data?.data as Employees[];
@@ -415,8 +497,12 @@ const EmployeesTable = (session: EmployeesTableProps) => {
     }
 
     useEffect(() => {
-        // getDepotInformation();
-        // getCountInformation();
+        getModuleInformation();
+        getDepartmentInformation();
+        getDesignationInformation();
+        getDepotInformation();
+        getCountInformation();
+        getPostingInformation();
         employeeTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -459,13 +545,17 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                     />
                 </div>
                 <div className="">
-                    <CreateZone
+                    <CreateEmployee
                         session={session}
-                        // depotData={depotData}
-                        zoneCount={zoneCount}
+                        moduleData={moduleData}
+                        depotData={depotData}
+                        departmentData={departmentData}
+                        designationData={designationData}
+                        postingData={postingData}
+                        idCount={idCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            zoneTableData({
+                            employeeTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
                                 sortOrder: "asc",
