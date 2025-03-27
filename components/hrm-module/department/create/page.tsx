@@ -80,7 +80,7 @@ export function CreateDepartment({ session, deptCount, onCreateSuccess }: Create
                             <DialogTitle className="text-2xl font-semibold text-gray-800">
                                 Create Department
                             </DialogTitle>
-                            <DialogDescription className="text-gray-500 text-center">
+                            <DialogDescription className="text-gray-500">
                                 Fill in the details below to create a new department.
                             </DialogDescription>
                         </DialogHeader>

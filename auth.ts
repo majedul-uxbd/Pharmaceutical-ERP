@@ -51,7 +51,7 @@ const credentialsConfig = CredentialsProvider({
                     employee_id: data.data.employee_id,
                     full_name: data.data.full_name,
                     designation_id: data.data.designation_id,
-                    designation: data.data.designation_name,
+                    designation_name: data.data.designation_name,
                     depot_id: data.data.depot_id,
                     depot_name: data.data.depot_name,
                     module_id: data.data.module_id,

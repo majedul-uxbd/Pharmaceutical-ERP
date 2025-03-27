@@ -69,7 +69,7 @@ const CreateEmployee = ({
 
 
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
-        // setButtonDisable(true);
+        setButtonDisable(true);
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/employees/add-employee`,
             {

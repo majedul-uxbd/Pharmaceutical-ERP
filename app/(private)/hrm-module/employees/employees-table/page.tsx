@@ -172,10 +172,10 @@ const EmployeesTable = (session: EmployeesTableProps) => {
         },
 
         {
-            accessorKey: "posting_place",
+            accessorKey: "place_name",
             header: "Posting Place",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("posting_place")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("place_name")}</div>
             ),
         },
 
