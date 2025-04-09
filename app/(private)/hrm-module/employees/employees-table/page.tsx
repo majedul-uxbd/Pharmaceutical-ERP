@@ -29,10 +29,6 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } fr
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateZone } from "@/components/hrm-module/zone/create/page";
-import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
-import ActivateZone from "@/components/hrm-module/zone/active/page";
-import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
 import { Employees } from "@/interfaces/employees.interface";
 import ActivateEmployee from "@/components/hrm-module/employees/active/page";
 import DeactivateEmployee from "@/components/hrm-module/employees/deactivate/page";
@@ -329,7 +325,6 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                 );
             },
         }
-
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {

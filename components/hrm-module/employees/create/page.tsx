@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import * as z from "zod";
 import PhoneInput from "react-phone-number-input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -438,7 +437,6 @@ const CreateEmployee = ({
                                             </FormItem>
                                         )}
                                     />
-
                                 </div>
 
                                 <DialogFooter className="w-full flex flex-row justify-between space-x-2">

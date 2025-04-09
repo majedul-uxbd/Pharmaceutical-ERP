@@ -109,7 +109,6 @@ export function CreateDesignation({ session, designationCount, onCreateSuccess }
                                                         <SelectItem value={designationCount.designation_id}>
                                                             {designationCount.designation_id}
                                                         </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
