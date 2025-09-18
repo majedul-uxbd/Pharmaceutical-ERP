@@ -156,7 +156,7 @@ export const RegisterForm = () => {
                       <FormControl>
                         <select
                           {...field}
-                          className="w-full p-2 border rounded-md focus:outline-none focus:ring"
+                          className="w-full p-2 border rounded-md focus:outline-hidden focus:ring-3"
                         >
                           <option value="">Select a position</option>
                           {positionOptions.map((position) => (
@@ -236,7 +236,7 @@ export const RegisterForm = () => {
                           <button
                             type="button"
                             onClick={() => setShowPassword((prev) => !prev)}
-                            className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-none"
+                            className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-hidden"
                           >
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
@@ -265,7 +265,7 @@ export const RegisterForm = () => {
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword((prev) => !prev)}
-                            className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-none"
+                            className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-hidden"
                           >
                             {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>

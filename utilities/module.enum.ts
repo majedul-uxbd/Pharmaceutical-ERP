@@ -17,6 +17,6 @@ export const ModuleInfo = [
     },
     {
         value: '07',
-        label: 'Accounts Management System',
+        label: 'Accounts Management System',
     },
 ];

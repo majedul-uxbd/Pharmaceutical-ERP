@@ -8,7 +8,8 @@ export interface Employees {
     present_address: string;
     permanent_address: string;
     joining_date: string;
-    posting_place: string | null;
+    nid_no: string;
+    place_name: string | null;
     permanent_date: string | null;
     designation_name: string;
     department_name: string;

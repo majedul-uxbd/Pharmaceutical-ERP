@@ -22,11 +22,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -50,9 +53,18 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         pageSize: 10,
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-
+    const [deptCount, setDeptCount] = useState<any[]>([]);
+    // 🔹 Load saved visibility from localStorage (if exists)
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+        () => {
+            if (typeof window !== "undefined") {
+                const saved = localStorage.getItem("storeTableColumnVisibility");
+                return saved ? JSON.parse(saved) : {};
+            }
+            return {};
+        }
+    );
 
     const columns: ColumnDef<Department>[] = [
         {
@@ -82,7 +94,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             accessorKey: "department_id",
             header: "Department ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("department_id")}</div>
+                <div className="whitespace-nowrap">{row.getValue("department_id")}</div>
             ),
         },
 
@@ -98,7 +110,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     const parts = departmentName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap text-slate-700">
+                        <div className="whitespace-nowrap">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -113,7 +125,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap text-slate-700">{departmentName}</div>;
+                return <div className="whitespace-nowrap">{departmentName}</div>;
             },
         },
 
@@ -121,7 +133,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             accessorKey: "department_code",
             header: "Department Code",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("department_code")}</div>
+                <div className="whitespace-nowrap">{row.getValue("department_code")}</div>
             ),
         },
 
@@ -129,21 +141,21 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
             ),
         },
         {
             accessorKey: "created_by",
             header: "Created By",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("created_by")}</div>
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
             ),
         },
         {
             accessorKey: "modified_by",
             header: "Modified By",
             cell: ({ row }) => {
-                return <div className="whitespace-nowrap text-slate-700">{row.getValue("modified_by") || "Not Modified"}</div>;
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
             },
         },
 
@@ -265,6 +277,26 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }))
     }, [pagination])
 
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-department-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        if (responseData.status === 'success') {
+            setDeptCount(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
     const departmentTableData = async (paginationData: any) => {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
@@ -285,7 +317,11 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             const responseData = await response.json();
             const departmentData = responseData?.data?.data as Department[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
-            setTotalPage(() => pageCount);
+            if (pageCount === 0) {
+                setTotalPage(() => 1);
+            } else {
+                setTotalPage(() => pageCount);
+            }
             setData(() => departmentData)
             setIsLoading(false)
         }
@@ -296,7 +332,14 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     }
 
     useEffect(() => {
-        // console.log("Pagination changed: Current value of pagination state: ", pagination);
+        localStorage.setItem(
+            "storeTableColumnVisibility",
+            JSON.stringify(columnVisibility)
+        );
+    }, [columnVisibility]);
+
+    useEffect(() => {
+        getCountInformation();
         departmentTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
@@ -338,10 +381,42 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         }
                     />
                 </div>
-                <div className="">
+                <div className="flex gap-2">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="default" className="flex items-center gap-2">
+                                <Settings2 className="h-4 w-4" />
+                                Columns
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-3">
+                            <p className="text-sm font-medium mb-2">Toggle Columns</p>
+                            <Separator className="mb-2" />
+                            <ScrollArea className="h-48 pr-2">
+                                <div className="flex flex-col gap-2">
+                                    {table
+                                        .getAllLeafColumns()
+                                        .filter((col) => col.getCanHide())
+                                        .map((column) => (
+                                            <div key={column.id} className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={column.getIsVisible()}
+                                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                                />
+                                                <label className="capitalize text-sm cursor-pointer">
+                                                    {column.id.replaceAll("_", " ")}
+                                                </label>
+                                            </div>
+                                        ))}
+                                </div>
+                            </ScrollArea>
+                        </PopoverContent>
+                    </Popover>
                     <CreateDepartment
                         session={session}
+                        deptCount={deptCount}
                         onCreateSuccess={() => {
+                            getCountInformation();
                             departmentTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
@@ -355,9 +430,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b ">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -395,7 +470,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

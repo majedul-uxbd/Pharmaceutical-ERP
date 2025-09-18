@@ -101,7 +101,13 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
         rootStyles={sidebarStyles}
       >
         <div className="flex flex-col h-full justify-around">
-          <Menu className="h-full">
+          <Menu className="h-full" menuItemStyles={{
+            button: {
+              '&:hover': {
+                backgroundColor: 'transparent', // removes hover color
+              },
+            },
+          }}>
             <MenuItem onClick={toggleSidebar} className="hidden md:block">
               <MenuIcon className="ml-2 size-6" />
             </MenuItem>
@@ -111,17 +117,17 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                 {/* Dashboard Menu Item */}
                 <MenuItem
                   component={<Link href="/hrm-module" />}
-                  className={cn(isActiveRoute("/hrm-module") && "bg-slate-100")}
+                  className={cn(isActiveRoute("/hrm-module") && "bg-accent")}
                   icon={
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <LayoutDashboard className="size-5" />
+                          <LayoutDashboard className="size-4" />
                         </TooltipTrigger>
                         <TooltipContent
                           side="right"
                           align="center"
-                          className="ml-8 bg-black text-white border p-2"
+                          className="border p-2"
                         >
                           Dashboard
                         </TooltipContent>
@@ -129,7 +135,9 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                     </TooltipProvider>
                   }
                 >
-                  Dashboard
+                  <p className="text-[14px]">
+                    Dashboard
+                  </p>
                 </MenuItem>
 
                 <DropdownMenu >
@@ -140,12 +148,12 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Settings2 className="size-5" />
+                              <Settings2 className="size-4" />
                             </TooltipTrigger>
                             <TooltipContent
                               side="right"
                               align="center"
-                              className="ml-8 bg-black text-white border p-2"
+                              className="border p-2"
                             >
                               Setup
                             </TooltipContent>
@@ -153,7 +161,7 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                         </TooltipProvider>
                       }
                     >
-                      <div className="flex w-full justify-between items-center">
+                      <div className="flex w-full text-[14px] justify-between items-center">
                         <span>Setup</span>
                         <ChevronRight className="size-4 text-muted-foreground" />
                       </div>
@@ -161,7 +169,7 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
-                    className="w-52 bg-white border shadow-md rounded-md overflow-hidden"
+                    className="w-52  border shadow-md rounded-md overflow-hidden"
                     align="start"
                     side="right" // Opens from the right side
                   >
@@ -169,35 +177,35 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 
                       <DropdownMenuItem asChild>
                         <Link
-                          className={cn(isActiveRoute("/hrm-module/department") && "bg-slate-100 cursor-pointer")}
+                          className={cn(isActiveRoute("/hrm-module/department") && "bg-accent cursor-pointer")}
                           href="/hrm-module/department">Department
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
-                          className={cn(isActiveRoute("/hrm-module/designation") && "bg-slate-100 cursor-pointer")}
+                          className={cn(isActiveRoute("/hrm-module/designation") && "bg-accent cursor-pointer")}
                           href="/hrm-module/designation">Designation
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
-                          className={cn(isActiveRoute("/hrm-module/zone") && "bg-slate-100 cursor-pointer")}
+                          className={cn(isActiveRoute("/hrm-module/zone") && "bg-accent cursor-pointer")}
                           href="/hrm-module/zone">Zone
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
-                          className={cn(isActiveRoute("/hrm-module/region") && "bg-slate-100 cursor-pointer")}
+                          className={cn(isActiveRoute("/hrm-module/region") && "bg-accent cursor-pointer")}
                           href="/hrm-module/region">Region
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
-                          className={cn(isActiveRoute("/hrm-module/market") && "bg-slate-100 cursor-pointer")}
+                          className={cn(isActiveRoute("/hrm-module/market") && "bg-accent cursor-pointer")}
                           href="/hrm-module/market">Market
                         </Link>
                       </DropdownMenuItem>
@@ -208,17 +216,17 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                 {/* Employees Menu Item */}
                 <MenuItem
                   component={<Link href="/hrm-module/employees" />}
-                  className={cn(isActiveRoute("/hrm-module/employees") && "bg-slate-100")}
+                  className={cn(isActiveRoute("/hrm-module/employees") && "bg-accent")}
                   icon={
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <UsersRound className="size-5" />
+                          <UsersRound className="size-4" />
                         </TooltipTrigger>
                         <TooltipContent
                           side="right"
                           align="center"
-                          className="ml-8 bg-black text-white border p-2"
+                          className="border p-2"
                         >
                           Employees
                         </TooltipContent>
@@ -226,7 +234,9 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
                     </TooltipProvider>
                   }
                 >
-                  Employees
+                  <p className="text-[14px]">
+                    Employees
+                  </p>
                 </MenuItem>
               </>
             )}
@@ -236,10 +246,10 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
             <NavUser session={session} />
           </SidebarFooter>
         </div>
-      </Sidebar>
+      </Sidebar >
 
       <div style={containerStyles}></div>
-    </div>
+    </div >
   );
 };
 

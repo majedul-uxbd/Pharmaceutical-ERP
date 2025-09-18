@@ -6,7 +6,7 @@ export default function SiteFooter() {
     href: "https://github.com/majedul-uxbd",
   }
   return (
-    <footer className="flex h-14 flex-row bg-white items-center justify-center border-t ">
+    <footer className="flex h-9 flex-row bg-accent items-center justify-center border-t ">
       All right reserved &copy;&nbsp;
       <Link
         className="text-muted-foreground hover:text-foreground hover:underline hover:underline-offset-4"

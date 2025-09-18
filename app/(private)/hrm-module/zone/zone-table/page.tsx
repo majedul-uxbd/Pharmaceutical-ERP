@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,7 +34,9 @@ import { CreateZone } from "@/components/hrm-module/zone/create/page";
 import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
 import ActivateZone from "@/components/hrm-module/zone/active/page";
 import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
-
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 interface ZoneTableProps {
     session: any;
 }
@@ -50,11 +52,18 @@ const ZoneTable = (session: ZoneTableProps) => {
         pageSize: 10,
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
     const [depotData, setDepotData] = useState<Zone[]>([]);
     const [zoneCount, setZoneCount] = useState<any[]>([]);
-
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+        () => {
+            if (typeof window !== "undefined") {
+                const saved = localStorage.getItem("storeTableColumnVisibility");
+                return saved ? JSON.parse(saved) : {};
+            }
+            return {};
+        }
+    );
 
     const columns: ColumnDef<Zone>[] = [
         {
@@ -332,15 +341,25 @@ const ZoneTable = (session: ZoneTableProps) => {
             const responseData = await response.json();
             const zoneData = responseData?.data?.data as Zone[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
-            setTotalPage(() => pageCount);
+            if (pageCount === 0) {
+                setTotalPage(() => 1);
+            } else {
+                setTotalPage(() => pageCount);
+            }
             setData(() => zoneData)
             setIsLoading(false)
         }
         else {
             console.error("fetch req failed: ", response)
         }
-
     }
+
+    useEffect(() => {
+        localStorage.setItem(
+            "storeTableColumnVisibility",
+            JSON.stringify(columnVisibility)
+        );
+    }, [columnVisibility]);
 
     useEffect(() => {
         getDepotInformation();
@@ -386,7 +405,38 @@ const ZoneTable = (session: ZoneTableProps) => {
                         }
                     />
                 </div>
-                <div className="">
+                <div className="flex gap-2">
+                    {/* Column Toggle Popover */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="default" className="flex items-center gap-2">
+                                <Settings2 className="h-4 w-4" />
+                                Columns
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-3">
+                            <p className="text-sm font-medium mb-2">Toggle Columns</p>
+                            <Separator className="mb-2" />
+                            <ScrollArea className="h-48 pr-2">
+                                <div className="flex flex-col gap-2">
+                                    {table
+                                        .getAllLeafColumns()
+                                        .filter((col) => col.getCanHide())
+                                        .map((column) => (
+                                            <div key={column.id} className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={column.getIsVisible()}
+                                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                                />
+                                                <label className="capitalize text-sm cursor-pointer">
+                                                    {column.id.replaceAll("_", " ")}
+                                                </label>
+                                            </div>
+                                        ))}
+                                </div>
+                            </ScrollArea>
+                        </PopoverContent>
+                    </Popover>
                     <CreateZone
                         session={session}
                         depotData={depotData}
