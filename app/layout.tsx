@@ -7,6 +7,7 @@ import SidebarPage from "@/components/app-menubar/sidenav";
 import { Toaster } from "@/components/ui/sonner";
 import SiteFooter from "@/components/app-menubar/footer";
 import { ReactNode } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,32 +36,38 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {session ? (
-          <div className="flex w-full flex-col flex-nowrap" >
-            <div className="fixed  top-0 left-0 right-0 z-50">
-              <Header session={session} />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {session ? (
+            <div className="flex w-full flex-col flex-nowrap" >
+              <div className="fixed  top-0 left-0 right-0 z-50">
+                <Header session={session} />
+              </div>
+              <div className="flex w-full flex-1">
+                <SidebarPage session={session?.user} />
+                <main className="flex-1 w-full mx-4 h-[calc(100%-125px)] my-16 overflow-hidden">
+                  {children}
+                  <ThemeProvider />
+                  <Toaster position="bottom-center" richColors expand={false} />
+                </main>
+              </div>
+              <div className="fixed  bottom-0 left-0 right-0 z-10">
+                <SiteFooter />
+              </div>
             </div>
-            <div className="flex w-full flex-1">
-              <SidebarPage session={session?.user} />
-              <main className="flex-1 w-full mx-4 h-[calc(100%-125px)] my-16 overflow-hidden">
+          ) : (
+            <div className="flex w-full flex-col min-h-screen">
+              <main className="flex-1 w-full overflow-hidden">
                 {children}
                 <Toaster position="bottom-center" richColors expand={false} />
               </main>
             </div>
-            <div className="fixed  bottom-0 left-0 right-0 z-10">
-              <SiteFooter />
-            </div>
-          </div>
-        ) : (
-          <div className="flex w-full flex-col min-h-screen">
-            <div className="flex w-full flex-1">
-              <main className="flex-1 w-full mx-4 my-10 overflow-hidden">
-                {children}
-                <Toaster position="bottom-center" richColors expand={false} />
-              </main>
-            </div>
-          </div>
-        )}
+          )}
+        </ThemeProvider>
       </body >
     </html >
   );

@@ -91,7 +91,7 @@ const ProfileCard = ({ session }: any) => {
                 {user?.full_name}
               </h1>
               <div>
-                <Badge variant="default" className="text-xs">
+                <Badge variant="default" className="text-xs uppercase">
                   {user?.designation_name}
                 </Badge>
               </div>

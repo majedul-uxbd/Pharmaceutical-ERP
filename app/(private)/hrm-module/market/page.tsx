@@ -5,9 +5,7 @@ const MarketPage = async () => {
     const session = await auth();
 
     return (
-        <div>
-            <MarketTable session={session?.user} />
-        </div>
+        <MarketTable session={session?.user} />
     )
 }
 

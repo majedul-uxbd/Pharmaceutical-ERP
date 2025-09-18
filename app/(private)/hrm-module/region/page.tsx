@@ -5,9 +5,7 @@ const RegionPage = async () => {
     const session = await auth();
 
     return (
-        <div>
-            <RegionTable session={session?.user} />
-        </div>
+        <RegionTable session={session?.user} />
     )
 }
 

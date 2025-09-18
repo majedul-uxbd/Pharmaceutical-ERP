@@ -29,7 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,6 +38,9 @@ import { CreateDesignation } from "@/components/hrm-module/designation/create/pa
 import ActivateDesignation from "@/components/hrm-module/designation/active/page";
 import DeactivateDesignation from "@/components/hrm-module/designation/deactivate/page";
 import UpdateDesignationDialog from "@/components/hrm-module/designation/update/page";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 
@@ -57,9 +60,18 @@ const DesignationTable = (session: DesignationTableProps) => {
         pageSize: 10,
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
     const [designationCount, setDesignationCount] = useState<any[]>([]);
+    // 🔹 Load saved visibility from localStorage (if exists)
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+        () => {
+            if (typeof window !== "undefined") {
+                const saved = localStorage.getItem("storeTableColumnVisibility");
+                return saved ? JSON.parse(saved) : {};
+            }
+            return {};
+        }
+    );
 
     const columns: ColumnDef<Designation>[] = [
         {
@@ -90,7 +102,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             accessorKey: "designation_id",
             header: "Designation ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_id")}</div>
+                <div className="whitespace-nowrap">{row.getValue("designation_id")}</div>
             ),
         },
 
@@ -106,7 +118,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                     const parts = designationName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap text-slate-700">
+                        <div className="whitespace-nowrap">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -121,7 +133,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap text-slate-700">{designationName}</div>;
+                return <div className="whitespace-nowrap">{designationName}</div>;
             },
         },
 
@@ -129,7 +141,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             accessorKey: "designation_code",
             header: "Designation Code",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("designation_code")}</div>
+                <div className="whitespace-nowrap">{row.getValue("designation_code")}</div>
             ),
         },
 
@@ -137,7 +149,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             accessorKey: "description",
             header: "Description",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("description")}</div>
+                <div className="whitespace-nowrap">{row.getValue("description")}</div>
             ),
         },
 
@@ -145,7 +157,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
             ),
         },
 
@@ -153,14 +165,14 @@ const DesignationTable = (session: DesignationTableProps) => {
             accessorKey: "created_by",
             header: "Created By",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("created_by")}</div>
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
             ),
         },
         {
             accessorKey: "modified_by",
             header: "Modified By",
             cell: ({ row }) => {
-                return <div className="whitespace-nowrap text-slate-700">{row.getValue("modified_by") || "Not Modified"}</div>;
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
             },
         },
 
@@ -292,10 +304,8 @@ const DesignationTable = (session: DesignationTableProps) => {
 
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
-
         if (responseData.status === 'success') {
             setDesignationCount(() => responseData?.data)
-
         } else {
             console.error(responseData.message);
         }
@@ -316,22 +326,29 @@ const DesignationTable = (session: DesignationTableProps) => {
             },
         );
 
-
         if (response.ok) {
             const responseData = await response.json();
-
             const designationData = responseData?.data?.data as Designation[];
-
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
-            setTotalPage(() => pageCount);
+            if (pageCount === 0) {
+                setTotalPage(() => 1);
+            } else {
+                setTotalPage(() => pageCount);
+            }
             setData(() => designationData)
             setIsLoading(false)
         }
         else {
             console.error("fetch req failed: ", response)
         }
-
     }
+
+    useEffect(() => {
+        localStorage.setItem(
+            "storeTableColumnVisibility",
+            JSON.stringify(columnVisibility)
+        );
+    }, [columnVisibility]);
 
     useEffect(() => {
         getCountInformation();
@@ -376,7 +393,38 @@ const DesignationTable = (session: DesignationTableProps) => {
                         }
                     />
                 </div>
-                <div className="">
+                <div className="flex gap-2">
+                    {/* Column Toggle Popover */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="default" className="flex items-center gap-2">
+                                <Settings2 className="h-4 w-4" />
+                                Columns
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-3">
+                            <p className="text-sm font-medium mb-2">Toggle Columns</p>
+                            <Separator className="mb-2" />
+                            <ScrollArea className="h-48 pr-2">
+                                <div className="flex flex-col gap-2">
+                                    {table
+                                        .getAllLeafColumns()
+                                        .filter((col) => col.getCanHide())
+                                        .map((column) => (
+                                            <div key={column.id} className="flex items-center gap-2">
+                                                <Checkbox
+                                                    checked={column.getIsVisible()}
+                                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                                />
+                                                <label className="capitalize text-sm cursor-pointer">
+                                                    {column.id.replaceAll("_", " ")}
+                                                </label>
+                                            </div>
+                                        ))}
+                                </div>
+                            </ScrollArea>
+                        </PopoverContent>
+                    </Popover>
                     <CreateDesignation
                         session={session}
                         designationCount={designationCount}
@@ -395,9 +443,9 @@ const DesignationTable = (session: DesignationTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -435,7 +483,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

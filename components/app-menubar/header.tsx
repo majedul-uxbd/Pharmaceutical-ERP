@@ -6,6 +6,7 @@ import { CodepenIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { ModeToggle } from "../shared/mode-toggle";
 
 
 const navLinks: { name: string; href: string }[] = [
@@ -36,6 +37,7 @@ const Header = ({ session }: { session: any }) => {
 						<span className="text-lg font-semibold">ERP System</span>
 					</div>
 				</div>
+				<ModeToggle />
 			</div>
 		</header>
 	);

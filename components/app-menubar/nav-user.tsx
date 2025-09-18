@@ -21,6 +21,7 @@ import Link from "next/link";
 import React from "react";
 import { useProfileNameStore, useProfileStore } from "@/assets/store";
 import SignOutDialog from "../shared/logout-dialog";
+import { Badge } from "../ui/badge";
 
 export function NavUser({ session }: any) {
     const imageUrl = useProfileStore((state: any) => state.imageUrl);
@@ -49,7 +50,7 @@ export function NavUser({ session }: any) {
                     </Avatar>
                     <div className="ml-5 grid flex-1 text-left text-sm">
                         <span className="truncate font-semibold">{full_name || session?.full_name}</span>
-                        <span className="truncate text-xs capitalize">
+                        <span className="truncate text-[11px] uppercase">
                             {session?.designation_name || "Unknown"}
                         </span>
                     </div>
@@ -57,13 +58,13 @@ export function NavUser({ session }: any) {
                 </div>
             </PopoverTrigger>
             <PopoverContent
-                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg ml-4"
                 align="end"
                 sideOffset={0}
                 side="right"
             >
-                <div className="grid gap-4">
-                    <div className="flex items-center gap-4">
+                <div className="grid gap-2">
+                    <div className="flex items-center gap-4 p-2 rounded-lg">
                         <Avatar className="h-8 w-8 rounded-2xl">
                             <AvatarImage
                                 src={`${process.env.NEXT_PUBLIC_API_URL}/${imageUrl || session?.profile_pic}`}
@@ -80,20 +81,22 @@ export function NavUser({ session }: any) {
                         </Avatar>
                         <div className="grid flex-1 text-start text-sm leading-tight">
                             <span className="truncate font-semibold">{full_name || session?.full_name}</span>
-                            {session?.designation_name || "Unknown"}
+                            <span className="truncate text-[11px] uppercase">
+                                {session?.designation_name || "Unknown"}
+                            </span>
                         </div>
                     </div>
                     <Separator />
                     <Link href={`/profile`}>
                         <div
-                            className="pt-2 pb-2 pl-2 hover:bg-slate-200 flex align-middle justify-start text-sm cursor-pointer rounded transition-colors duration-200"
+                            className="pt-2 pb-2 pl-2 hover:bg-accent flex align-middle justify-start text-sm cursor-pointer rounded transition-colors duration-200"
                             onClick={() => setPopOverStage(false)}
                         >
                             <User2 className="h-5 w-5 mr-3" />
                             Profile
                         </div>
                     </Link>
-                    <div className="pt-2 pb-2 pl-2 hover:bg-slate-200 flex align-middle justify-start text-sm cursor-pointer rounded transition-colors duration-200">
+                    <div className="pt-2 pb-2 pl-2 hover:bg-accent flex align-middle justify-start text-sm cursor-pointer rounded transition-colors duration-200">
                         <LogOut className="h-5 w-5 mr-3" />
                         <SignOutDialog />
                     </div>
