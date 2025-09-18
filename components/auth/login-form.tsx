@@ -173,7 +173,7 @@ export const LoginForm = ({ session }: LoginFormCardProps) => {
                             <button
                               type="button"
                               onClick={() => setShowPassword((prev) => !prev)}
-                              className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-none"
+                              className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-hidden"
                             >
                               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>

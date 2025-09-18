@@ -6,6 +6,7 @@ import Header from "@/components/app-menubar/header";
 import SidebarPage from "@/components/app-menubar/sidenav";
 import { Toaster } from "@/components/ui/sonner";
 import SiteFooter from "@/components/app-menubar/footer";
+import { ReactNode } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   const session = await auth();
 
@@ -51,19 +52,12 @@ export default async function RootLayout({
             </div>
           </div>
         ) : (
-          <div className="flex w-full flex-col flex-nowrap " >
-            <div className="fixed  top-0 left-0 right-0 z-50">
-              <Header session={session} />
-            </div>
+          <div className="flex w-full flex-col min-h-screen">
             <div className="flex w-full flex-1">
-              {/* <SidebarPage session={session?.user} /> */}
               <main className="flex-1 w-full mx-4 my-10 overflow-hidden">
                 {children}
                 <Toaster position="bottom-center" richColors expand={false} />
               </main>
-            </div>
-            <div className="fixed  bottom-0 left-0 right-0 z-10">
-              <SiteFooter />
             </div>
           </div>
         )}
