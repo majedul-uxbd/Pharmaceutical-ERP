@@ -43,6 +43,25 @@ interface EmployeesTableProps {
     session: any;
 }
 
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
 const EmployeesTable = (session: EmployeesTableProps) => {
     const accessToken = session?.session.id;
     const [data, setData] = useState<Employees[]>([]);
@@ -52,7 +71,8 @@ const EmployeesTable = (session: EmployeesTableProps) => {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
     const [moduleData, setModuleData] = useState<any[]>([]);
@@ -109,39 +129,18 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "full_name",
             header: "Full Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('full_name')?.getFilterValue() as string) || "";
                 const fullName = row.getValue("full_name") as string;
-
-                if (filterValue && fullName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = fullName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap ">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap ">{fullName}</div>;
+                return <div className="whitespace-nowrap">{highlightText(fullName, globalFilter)}</div>;
             },
         },
 
         {
             accessorKey: "email",
             header: "Email",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.original.email ? row.original.email : ""}</div>
-            ),
+            cell: ({ row }) => {
+                const email = row.getValue("email") as string;
+                return <div className="whitespace-nowrap">{highlightText(email, globalFilter)}</div>;
+            },
         },
 
         {
@@ -560,7 +559,9 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
     return (
         <div className="w-full">
@@ -568,13 +569,9 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full"
-                        placeholder="Filter by Department Name..."
-                        value={(
-                            table.getColumn('full_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('full_name')?.setFilterValue(event.target.value)
-                        }
+                        placeholder="Search by Full name or Email..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
                 <div className="w-full flex justify-between md:justify-end  gap-2">
@@ -632,12 +629,12 @@ const EmployeesTable = (session: EmployeesTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
-                                        className="text-center font-bold"
+                                        className="text-center font-bold border bg-accent"
                                         key={header.id}
                                     >
                                         {header.isPlaceholder
@@ -661,7 +658,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('full_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getState().globalFilter ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -670,9 +667,9 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                             </TableRow>
                         ) : data.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow className="text-center" key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -687,8 +684,6 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                         )}
                     </TableBody>
                 </Table>
-
-
             </div>
             <div className="flex items-center justify-between py-2 border rounded-b-md px-2">
                 <div className="flex-1 hidden sm:block text-sm text-muted-foreground">

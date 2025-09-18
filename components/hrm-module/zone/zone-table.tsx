@@ -41,6 +41,25 @@ interface ZoneTableProps {
     session: any;
 }
 
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
 const ZoneTable = (session: ZoneTableProps) => {
     const accessToken = session?.session.id;
     const [data, setData] = useState<Zone[]>([]);
@@ -50,7 +69,8 @@ const ZoneTable = (session: ZoneTableProps) => {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
     const [depotData, setDepotData] = useState<Zone[]>([]);
@@ -94,54 +114,34 @@ const ZoneTable = (session: ZoneTableProps) => {
             accessorKey: "zone_id",
             header: "Zone ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_id")}</div>
+                <div className="whitespace-nowrap ">{row.getValue("zone_id")}</div>
             ),
         },
 
         {
             accessorKey: "zone_name",
             header: "Zone Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_name")}</div>
-            ),
+            cell: ({ row }) => {
+                const zoneName = row.getValue("zone_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(zoneName, globalFilter)}</div>;
+            },
         },
 
         {
             accessorKey: "zone_code",
             header: "Zone Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_code")}</div>
-            ),
+            cell: ({ row }) => {
+                const zoneCode = row.getValue("zone_code") as string;
+                return <div className="whitespace-nowrap">{highlightText(zoneCode, globalFilter)}</div>;
+            },
         },
 
         {
             accessorKey: "depot_name",
             header: "Depot Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('depot_name')?.getFilterValue() as string) || "";
-                const depotName = row.getValue("depot_name") as string;
-
-                if (filterValue && depotName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = depotName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{depotName}</div>;
+                const deportName = row.getValue("depot_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(deportName, globalFilter)}</div>;
             },
         },
 
@@ -164,7 +164,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap ">{row.getValue("comment")}</div>
             ),
         },
 
@@ -388,7 +388,9 @@ const ZoneTable = (session: ZoneTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
     return (
         <div className="w-full">
@@ -396,13 +398,9 @@ const ZoneTable = (session: ZoneTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full"
-                        placeholder="Filter by Depot Name..."
-                        value={(
-                            table.getColumn('depot_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('depot_name')?.setFilterValue(event.target.value)
-                        }
+                        placeholder="Search by Zone name or Code or Deport Name..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
                 <div className="w-full flex justify-between md:justify-end  gap-2">
@@ -456,9 +454,9 @@ const ZoneTable = (session: ZoneTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b ">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -496,14 +494,14 @@ const ZoneTable = (session: ZoneTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>

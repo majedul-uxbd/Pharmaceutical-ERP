@@ -44,11 +44,26 @@ interface MarketTableProps {
     session: any;
 }
 
-const MarketTable = (session: MarketTableProps) => {
-    console.log('🚀 ------------------------------------------🚀');
-    console.log('🚀 ~ :48 ~ MarketTable ~ session:', session);
-    console.log('🚀 ------------------------------------------🚀');
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
 
+const MarketTable = (session: MarketTableProps) => {
     const accessToken = session?.session.id;
     const [data, setData] = useState<Market[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +72,8 @@ const MarketTable = (session: MarketTableProps) => {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
     const [regionData, setRegionData] = useState<Region[]>([]);
@@ -102,54 +118,34 @@ const MarketTable = (session: MarketTableProps) => {
             accessorKey: "market_id",
             header: "Market ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_id")}</div>
+                <div className="whitespace-nowrap">{row.getValue("market_id")}</div>
             ),
         },
 
         {
             accessorKey: "market_name",
             header: "Market Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_name")}</div>
-            ),
+            cell: ({ row }) => {
+                const marketName = row.getValue("market_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(marketName, globalFilter)}</div>;
+            },
         },
 
         {
             accessorKey: "market_code",
             header: "Market Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_code")}</div>
-            ),
+            cell: ({ row }) => {
+                const marketCode = row.getValue("market_code") as string;
+                return <div className="whitespace-nowrap">{highlightText(marketCode, globalFilter)}</div>;
+            },
         },
 
         {
             accessorKey: "region_name",
             header: "Region Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('region_name')?.getFilterValue() as string) || "";
                 const regionName = row.getValue("region_name") as string;
-
-                if (filterValue && regionName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = regionName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{regionName}</div>;
+                return <div className="whitespace-nowrap">{highlightText(regionName, globalFilter)}</div>;
             },
         },
 
@@ -172,7 +168,7 @@ const MarketTable = (session: MarketTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
             ),
         },
 
@@ -390,7 +386,9 @@ const MarketTable = (session: MarketTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
 
     return (
@@ -398,14 +396,10 @@ const MarketTable = (session: MarketTableProps) => {
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Region Name..."
-                        value={(
-                            table.getColumn('region_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('region_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Market name or Code or Region name..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
                 <div className="w-full flex justify-between md:justify-end  gap-2">
@@ -441,7 +435,7 @@ const MarketTable = (session: MarketTableProps) => {
                         </PopoverContent>
                     </Popover>
                     <CreateMarket
-                        session={session}
+                        accessToken={accessToken}
                         regionData={regionData}
                         marketCount={marketCount}
                         onCreateSuccess={() => {
@@ -459,9 +453,9 @@ const MarketTable = (session: MarketTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -491,7 +485,7 @@ const MarketTable = (session: MarketTableProps) => {
                         ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center ">
                                     No data matched
                                 </TableCell>
                             </TableRow>
@@ -499,14 +493,14 @@ const MarketTable = (session: MarketTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>

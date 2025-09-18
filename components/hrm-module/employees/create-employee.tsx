@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateSchema } from "@/schema/employee.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -93,9 +93,26 @@ const CreateEmployee = ({
         setButtonDisable(false);
     };
 
-    // const handleSubmit = form.handleSubmit(onSubmit, (errors) => {
-    //     console.error("🚨 Validation errors:", errors);
-    // });
+    useEffect(() => {
+        if (idCount?.employee_id) {
+            form.reset({
+                employee_id: idCount.employee_id,
+                full_name: '',
+                email: "",
+                contact: '',
+                present_address: '',
+                permanent_address: '',
+                joining_date: '',
+                posting_place: '',
+                permanent_date: '',
+                nid_no: '',
+                designation_name: designationData.designation_id,
+                department_name: departmentData.department_id,
+                module_name: moduleData.module_id,
+                depot_name: depotData.depot_id
+            });
+        }
+    }, [idCount, form]);
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -105,7 +122,7 @@ const CreateEmployee = ({
                     <span className="">Add Employee</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] h-[97vh]">
+            <DialogContent className="sm:max-w-[650px] h-[97vh]">
                 {moduleData.length > 0 &&
                     depotData.length > 0 &&
                     departmentData.length > 0 &&
@@ -124,319 +141,333 @@ const CreateEmployee = ({
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="space-y-4  h-[70vh]  overflow-auto">
-                                    {/* Employee ID */}
-                                    <FormField
-                                        control={form.control}
-                                        name="employee_id"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Employee ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Employee ID */}
+                                        <FormField
+                                            control={form.control}
+                                            name="employee_id"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Employee ID</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select employee ID" />
-                                                        </SelectTrigger>
+                                                        <Input {...field} readOnly />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={idCount.employee_id}>
-                                                            {idCount.employee_id}
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    {/* Full Name Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="full_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Full Name</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Full Name" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                        {/* Full Name Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="full_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Full Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder="Enter Full Name" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Email Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="email" placeholder="Enter Email" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    {/* Email Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} type="email" placeholder="Enter Email" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Contact Number Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="contact"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Contact</FormLabel>
-                                                <FormControl>
-                                                    <PhoneInput
-                                                        {...field}
-                                                        placeholder="Enter phone number"
-                                                        value={field.value}
-                                                        onChange={(phone) => field.onChange(phone)}
-                                                        defaultCountry="BD"
-                                                        className="w-full p-2 border rounded-md"
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Present Address Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="present_address"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Present Address</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Present Address" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Permanent Address Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="permanent_address"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Permanent Address</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Permanent Address" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* NID No Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="nid_no"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>NID No</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter NID No" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Joining Date Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="joining_date"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Joining Date</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
-                                                        >
-                                                            <CalendarIcon />
-                                                            {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0">
-                                                        <Calendar
-                                                            mode="single"
-                                                            selected={field.value ? new Date(field.value) : undefined} // Convert string to Date
-                                                            onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")} // Convert Date to string
-                                                            initialFocus
+                                        {/* Contact Number Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="contact"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Contact</FormLabel>
+                                                    <FormControl>
+                                                        <PhoneInput
+                                                            {...field}
+                                                            placeholder="Enter phone number"
+                                                            value={field.value}
+                                                            onChange={(phone) => field.onChange(phone)}
+                                                            defaultCountry="BD"
+                                                            className="w-full p-2 border rounded-md"
                                                         />
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Permanent Date Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="permanent_date"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Permanent Date</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
-
-                                                        >
-                                                            <CalendarIcon />
-                                                            {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0">
-                                                        <Calendar
-                                                            mode="single"
-                                                            selected={field.value ? new Date(field.value) : undefined} // Convert string to Date
-                                                            onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")} // Convert Date to string, or allow empty
-                                                            initialFocus
-                                                        />
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Posting Place */}
-                                    <FormField
-                                        control={form.control}
-                                        name="posting_place"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Posting Place</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Posting Place" />
-                                                        </SelectTrigger>
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        {postingData.map((post: any) => (
-                                                            <SelectItem key={post.id} value={post.place_id}>
-                                                                {post.place_name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
-                                    {/* Designation Name */}
-                                    <FormField
-                                        control={form.control}
-                                        name="designation_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Designation Name</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Present Address Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="present_address"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Present Address</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a option" />
-                                                        </SelectTrigger>
+                                                        <Input {...field} placeholder="Enter Present Address" />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        {designationData.map((designation: any) => (
-                                                            <SelectItem key={designation.id} value={designation.designation_id}>
-                                                                {designation.designation_name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    {/* Department Name */}
-                                    <FormField
-                                        control={form.control}
-                                        name="department_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Department Name</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        {/* Permanent Address Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="permanent_address"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Permanent Address</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a option" />
-                                                        </SelectTrigger>
+                                                        <Input {...field} placeholder="Enter Permanent Address" />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        {departmentData.map((department: any) => (
-                                                            <SelectItem key={department.id} value={department.department_id}>
-                                                                {department.department_name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
-                                    {/* Depot Name */}
-                                    <FormField
-                                        control={form.control}
-                                        name="depot_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Depot Name</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a option" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {depotData.map((depot: any) => (
-                                                            <SelectItem key={depot.id} value={depot.depot_id}>
-                                                                {depot.depot_name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Joining Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="joining_date"
+                                            render={({ field }) => {
+                                                const [open, setOpen] = useState(false); // control popover open state
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Joining Date</FormLabel>
+                                                        <Popover open={open} onOpenChange={setOpen}>
+                                                            <PopoverTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
+                                                                >
+                                                                    <CalendarIcon className="mr-2" />
+                                                                    {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
+                                                                </Button>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-auto p-0">
+                                                                <Calendar
+                                                                    mode="single"
+                                                                    selected={field.value ? new Date(field.value) : undefined}
+                                                                    onSelect={(date) => {
+                                                                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                                                                        setOpen(false); // close popover when date is selected
+                                                                    }}
+                                                                    initialFocus
+                                                                />
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                );
+                                            }}
+                                        />
 
-                                    {/* Module Name */}
-                                    <FormField
-                                        control={form.control}
-                                        name="module_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Module Name</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        {/* Permanent Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="permanent_date"
+                                            render={({ field }) => {
+                                                const [open, setOpen] = useState(false);
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Permanent Date</FormLabel>
+                                                        <Popover open={open} onOpenChange={setOpen}>
+                                                            <PopoverTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
+                                                                >
+                                                                    <CalendarIcon className="mr-2" />
+                                                                    {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
+                                                                </Button>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-auto p-0">
+                                                                <Calendar
+                                                                    mode="single"
+                                                                    selected={field.value ? new Date(field.value) : undefined}
+                                                                    onSelect={(date) => {
+                                                                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                                                                        setOpen(false); // close popover when date is selected
+                                                                    }}
+                                                                />
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                );
+                                            }}
+                                        />
+
+                                    </div>
+
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* NID No Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="nid_no"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>NID No</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a option" />
-                                                        </SelectTrigger>
+                                                        <Input {...field} placeholder="Enter NID No" />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        {moduleData.map((module: any) => (
-                                                            <SelectItem key={module.id} value={module.module_id}>
-                                                                {module.module_name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        {/* Posting Place */}
+                                        <FormField
+                                            control={form.control}
+                                            name="posting_place"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Posting Place</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select Posting Place" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {postingData.map((post: any) => (
+                                                                <SelectItem key={post.id} value={post.place_id}>
+                                                                    {post.place_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Designation Name */}
+                                        <FormField
+                                            control={form.control}
+                                            name="designation_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Designation Name</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a option" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {designationData.map((designation: any) => (
+                                                                <SelectItem key={designation.id} value={designation.designation_id}>
+                                                                    {designation.designation_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        {/* Department Name */}
+                                        <FormField
+                                            control={form.control}
+                                            name="department_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Department Name</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a option" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {departmentData.map((department: any) => (
+                                                                <SelectItem key={department.id} value={department.department_id}>
+                                                                    {department.department_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Depot Name */}
+                                        <FormField
+                                            control={form.control}
+                                            name="depot_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Depot Name</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a option" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {depotData.map((depot: any) => (
+                                                                <SelectItem key={depot.id} value={depot.depot_id}>
+                                                                    {depot.depot_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        {/* Module Name */}
+                                        <FormField
+                                            control={form.control}
+                                            name="module_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Module Name</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a option" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {moduleData.map((module: any) => (
+                                                                <SelectItem key={module.id} value={module.module_id}>
+                                                                    {module.module_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
 
                                 <DialogFooter className="w-full flex flex-row justify-between space-x-2">

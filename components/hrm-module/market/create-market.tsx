@@ -20,13 +20,12 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 interface CreateMarketProps {
-    session: any;
+    accessToken: any;
     regionData: any;
     marketCount: any;
     onCreateSuccess(): void;
 }
-export function CreateMarket({ session, regionData, marketCount, onCreateSuccess }: CreateMarketProps) {
-    const authToken = session?.id;
+export function CreateMarket({ accessToken, regionData, marketCount, onCreateSuccess }: CreateMarketProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -49,7 +48,7 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
             {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${authToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(values),
