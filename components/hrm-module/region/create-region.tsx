@@ -70,12 +70,24 @@ export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }
         setButtonDisable(false);
     };
 
+    useEffect(() => {
+        if (regionCount.region_id && regionCount.region_code) {
+            form.reset({
+                zone_name: "",
+                region_id: regionCount.region_id,
+                region_code: regionCount.region_code,
+                region_name: "",
+                comment: ""
+            });
+        }
+    }, [regionCount, form]);
+
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-400 dark:hover:bg-blue-500">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Region</span>
+                    <span className="">Add Region</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -129,18 +141,9 @@ export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Region ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Region ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={regionCount.region_id}>
-                                                            {regionCount.region_id}
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -153,18 +156,9 @@ export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Region Code</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Region ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={regionCount.region_code}>
-                                                            {regionCount.region_code}
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

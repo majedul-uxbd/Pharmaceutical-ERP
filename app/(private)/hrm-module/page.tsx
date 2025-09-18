@@ -30,9 +30,7 @@ const HrmModule = async () => {
     }
     else {
         return (
-            <div>
-                <HrmDashboard session={session?.user} />
-            </div>
+            <HrmDashboard session={session?.user} />
         );
     }
 }

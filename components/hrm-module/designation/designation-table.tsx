@@ -380,10 +380,10 @@ const DesignationTable = (session: DesignationTableProps) => {
     })
     return (
         <div className="w-full">
-            <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
+            <div className="flex justify-start flex-col gap-2 lg:flex-row lg:justify-between items-start lg:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-2/5"
+                        className="w-full"
                         placeholder="Filter by Designation Name..."
                         value={(
                             table.getColumn('designation_name')?.getFilterValue() as string
@@ -393,7 +393,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                         }
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>

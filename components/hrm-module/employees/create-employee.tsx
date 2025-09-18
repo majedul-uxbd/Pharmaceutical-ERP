@@ -102,7 +102,7 @@ const CreateEmployee = ({
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-400 dark:hover:bg-blue-500">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Employee</span>
+                    <span className="">Add Employee</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] h-[97vh]">

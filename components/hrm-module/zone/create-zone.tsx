@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateSchema } from "@/schema/zone.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -42,6 +42,17 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
         },
     });
 
+    useEffect(() => {
+        if (zoneCount?.zone_id && zoneCount.zone_code) {
+            form.reset({
+                depot_name: "",
+                zone_id: zoneCount.zone_id,
+                zone_code: zoneCount.zone_code,
+                zone_name: "",
+                comment: ""
+            });
+        }
+    }, [zoneCount, form]);
 
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
 
@@ -129,19 +140,9 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Zone ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_id}>
-                                                            {zoneCount.zone_id}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -154,19 +155,9 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Zone Code</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone Code" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_code}>
-                                                            {zoneCount.zone_code}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

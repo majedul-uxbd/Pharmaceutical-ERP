@@ -408,7 +408,7 @@ const MarketTable = (session: MarketTableProps) => {
                         }
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>

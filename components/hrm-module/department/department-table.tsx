@@ -381,7 +381,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         }
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" size="default" className="flex items-center gap-2">

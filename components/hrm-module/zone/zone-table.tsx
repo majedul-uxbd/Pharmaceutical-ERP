@@ -395,7 +395,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
+                        className="w-full"
                         placeholder="Filter by Depot Name..."
                         value={(
                             table.getColumn('depot_name')?.getFilterValue() as string
@@ -405,7 +405,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                         }
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>

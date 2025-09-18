@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateSchema } from "@/schema/department.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -38,6 +38,17 @@ export function CreateDepartment({ session, deptCount, onCreateSuccess }: Create
             comment: ""
         },
     });
+
+    useEffect(() => {
+        if (deptCount?.department_id) {
+            form.reset({
+                department_id: deptCount.department_id,
+                department_code: "",
+                department_name: "",
+                comment: "",
+            });
+        }
+    }, [deptCount, form]);
 
     const onSubmit = async (values: z.infer<typeof CreateSchema>) => {
         setButtonDisable(true);
@@ -70,7 +81,7 @@ export function CreateDepartment({ session, deptCount, onCreateSuccess }: Create
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-400 dark:hover:bg-blue-500">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Department</span>
+                    <span className="">Add Department</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -97,19 +108,9 @@ export function CreateDepartment({ session, deptCount, onCreateSuccess }: Create
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Department ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Department ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={deptCount.department_id}>
-                                                            {deptCount.department_id}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

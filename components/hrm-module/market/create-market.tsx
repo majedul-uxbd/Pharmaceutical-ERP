@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateSchema } from "@/schema/market.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -27,9 +27,6 @@ interface CreateMarketProps {
 }
 export function CreateMarket({ session, regionData, marketCount, onCreateSuccess }: CreateMarketProps) {
     const authToken = session?.id;
-    console.log('🚀 -----------------------------------------------🚀');
-    console.log('🚀 ~ :30 ~ CreateMarket ~ authToken:', authToken);
-    console.log('🚀 -----------------------------------------------🚀');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
 
@@ -71,12 +68,24 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
         setButtonDisable(false);
     };
 
+    useEffect(() => {
+        if (marketCount?.market_id && marketCount?.market_code) {
+            form.reset({
+                region_name: "",
+                market_id: marketCount.market_id,
+                market_code: marketCount.market_code,
+                market_name: "",
+                comment: ""
+            });
+        }
+    }, [marketCount, form]);
+
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-400 dark:hover:bg-blue-500">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Market</span>
+                    <span className="">Add Market</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -130,19 +139,10 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Market ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Market ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={marketCount.market_id}>
-                                                            {marketCount.market_id}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
+                                                <FormMessage />
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -155,19 +155,10 @@ export function CreateMarket({ session, regionData, marketCount, onCreateSuccess
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Market Code</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Market Code" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={marketCount.market_code}>
-                                                            {marketCount.market_code}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
+                                                <FormMessage />
                                                 <FormMessage />
                                             </FormItem>
                                         )}
