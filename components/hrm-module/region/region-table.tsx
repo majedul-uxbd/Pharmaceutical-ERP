@@ -1,6 +1,5 @@
 "use client";
 
-import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -22,9 +21,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -33,18 +29,24 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Set
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateDepartment } from "@/components/hrm-module/department/create/page";
-import DeactivateDepartment from "@/components/hrm-module/department/deactivate/page";
-import ActivateDepartment from "@/components/hrm-module/department/active/page";
-import UpdateDepartmentDialog from "@/components/hrm-module/department/update/page";
+import { Region } from "@/interfaces/region.interface";
+import { CreateRegion } from "@/components/hrm-module/region/create-region";
+import DeactivateRegion from "@/components/hrm-module/region/deactive-region";
+import ActivateRegion from "@/components/hrm-module/region/active.region";
+import UpdateRegionDialog from "@/components/hrm-module/region/update-region";
+import { Zone } from "@/interfaces/zone.interface";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface DepartmentTableProps {
+interface RegionTableProps {
     session: any;
 }
 
-const DepartmentTable = (session: DepartmentTableProps) => {
+const RegionTable = (session: RegionTableProps) => {
+
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Department[]>([]);
+    const [data, setData] = useState<Region[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -54,7 +56,8 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [deptCount, setDeptCount] = useState<any[]>([]);
+    const [zoneData, setZoneData] = useState<Zone[]>([]);
+    const [regionCount, setRegionCount] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -66,7 +69,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Department>[] = [
+    const columns: ColumnDef<Region>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -90,27 +93,44 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             enableSorting: true,
             enableHiding: false,
         },
+
         {
-            accessorKey: "department_id",
-            header: "Department ID",
+            accessorKey: "region_id",
+            header: "Region ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("department_id")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_id")}</div>
             ),
         },
 
         {
-            accessorKey: "department_name",
-            header: "Department Name",
-            cell: ({ row }) => {
-                const filterValue = (table.getColumn('department_name')?.getFilterValue() as string) || "";
-                const departmentName = row.getValue("department_name") as string;
+            accessorKey: "region_name",
+            header: "Region Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
+            ),
+        },
 
-                if (filterValue && departmentName.toLowerCase().includes(filterValue.toLowerCase())) {
+        {
+            accessorKey: "region_code",
+            header: "Region Code",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_code")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "zone_name",
+            header: "Zone Name",
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('zone_name')?.getFilterValue() as string) || "";
+                const zoneName = row.getValue("zone_name") as string;
+
+                if (filterValue && zoneName.toLowerCase().includes(filterValue.toLowerCase())) {
                     // Highlight matching text using regex
-                    const parts = departmentName.split(new RegExp(`(${filterValue})`, "gi"));
+                    const parts = zoneName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap">
+                        <div className="whitespace-nowrap text-slate-700">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -125,45 +145,15 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap">{departmentName}</div>;
+                return <div className="whitespace-nowrap text-slate-700">{zoneName}</div>;
             },
         },
 
         {
-            accessorKey: "department_code",
-            header: "Department Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("department_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
-            ),
-        },
-        {
-            accessorKey: "created_by",
-            header: "Created By",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
-            ),
-        },
-        {
-            accessorKey: "modified_by",
-            header: "Modified By",
-            cell: ({ row }) => {
-                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
-            },
-        },
-
-        {
-            accessorKey: "department_status",
+            accessorKey: "region_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("department_status") === 1;
+                const isActive = row.getValue("region_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -173,6 +163,13 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                     </Badge>
                 );
             },
+        },
+        {
+            accessorKey: "comment",
+            header: "Comment",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+            ),
         },
 
         {
@@ -200,7 +197,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.department_status === 1;
+                const isActive = row.original.region_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -216,11 +213,11 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateDepartment
+                                    <DeactivateRegion
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            departmentTableData({
+                                            regionTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -231,11 +228,11 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateDepartment
+                                    <ActivateRegion
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            departmentTableData({
+                                            regionTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -247,11 +244,12 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateDepartmentDialog
+                                <UpdateRegionDialog
                                     rowData={row.original}
+                                    zoneData={zoneData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        departmentTableData({
+                                        regionTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -277,9 +275,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }))
     }, [pagination])
 
-    const getCountInformation = async () => {
+    const getZoneInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-department-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-zone`,
             {
                 method: 'GET',
                 headers: {
@@ -290,16 +288,43 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         );
 
         const responseData = await response.json();
+        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
+
         if (responseData.status === 'success') {
-            setDeptCount(() => responseData?.data)
+            setZoneData(() => responseData?.data)
+            setIsLoading(false);
+
+        } else {
+            setIsLoading(true);
+            console.error(responseData.message);
+        }
+        // setButtonDisable(false);
+    };
+
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-region-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+        if (responseData.status === 'success') {
+            setRegionCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const departmentTableData = async (paginationData: any) => {
+    const regionTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/region/get-region-data`,
             {
                 method: 'POST',
                 headers: {
@@ -312,23 +337,21 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             },
         );
 
-
         if (response.ok) {
             const responseData = await response.json();
-            const departmentData = responseData?.data?.data as Department[];
+            const regionData = responseData?.data?.data as Region[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => departmentData)
+            setData(() => regionData)
             setIsLoading(false)
         }
         else {
             console.error("fetch req failed: ", response)
         }
-
     }
 
     useEffect(() => {
@@ -339,8 +362,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
+        getZoneInformation();
         getCountInformation();
-        departmentTableData({
+        regionTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -372,16 +396,17 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full md:w-3/5"
-                        placeholder="Filter by Department Name..."
+                        placeholder="Filter by Zone Name..."
                         value={(
-                            table.getColumn('department_name')?.getFilterValue() as string
+                            table.getColumn('zone_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('department_name')?.setFilterValue(event.target.value)
+                            table.getColumn('zone_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
                 <div className="flex gap-2">
+                    {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" size="default" className="flex items-center gap-2">
@@ -412,15 +437,16 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateDepartment
+                    <CreateRegion
                         session={session}
-                        deptCount={deptCount}
+                        zoneData={zoneData}
+                        regionCount={regionCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            departmentTableData({
+                            regionTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "asc",
+                                sortOrder: "desc",
                                 filterBy: "",
                             });
                         }}
@@ -430,9 +456,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b ">
+                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -459,7 +485,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('department_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('zone_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
@@ -470,7 +496,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -558,4 +584,4 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     )
 }
 
-export default DepartmentTable;
+export default RegionTable;

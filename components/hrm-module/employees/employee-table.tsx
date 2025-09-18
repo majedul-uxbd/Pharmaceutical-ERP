@@ -21,6 +21,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -29,24 +32,20 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Set
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Region } from "@/interfaces/region.interface";
-import { CreateRegion } from "@/components/hrm-module/region/create/page";
-import DeactivateRegion from "@/components/hrm-module/region/deactivate/page";
-import ActivateRegion from "@/components/hrm-module/region/active/page";
-import UpdateRegionDialog from "@/components/hrm-module/region/update/page";
-import { Zone } from "@/interfaces/zone.interface";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Employees } from "@/interfaces/employees.interface";
+import ActivateEmployee from "@/components/hrm-module/employees/active-employee";
+import DeactivateEmployee from "@/components/hrm-module/employees/deactive-employee";
+import { Depot } from "@/interfaces/depot.interface";
+import CreateEmployee from "@/components/hrm-module/employees/create-employee";
 
-interface RegionTableProps {
+
+interface EmployeesTableProps {
     session: any;
 }
 
-const RegionTable = (session: RegionTableProps) => {
-
+const EmployeesTable = (session: EmployeesTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Region[]>([]);
+    const [data, setData] = useState<Employees[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -56,8 +55,12 @@ const RegionTable = (session: RegionTableProps) => {
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [zoneData, setZoneData] = useState<Zone[]>([]);
-    const [regionCount, setRegionCount] = useState<any[]>([]);
+    const [moduleData, setModuleData] = useState<any[]>([]);
+    const [departmentData, setDepartmentData] = useState<any[]>([]);
+    const [designationData, setDesignationData] = useState<any[]>([]);
+    const [depotData, setDepotData] = useState<Depot[]>([]);
+    const [idCount, setIdCount] = useState<any[]>([]);
+    const [postingData, setPostingData] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -69,7 +72,7 @@ const RegionTable = (session: RegionTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Region>[] = [
+    const columns: ColumnDef<Employees>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -95,42 +98,26 @@ const RegionTable = (session: RegionTableProps) => {
         },
 
         {
-            accessorKey: "region_id",
-            header: "Region ID",
+            accessorKey: "employee_id",
+            header: "Employee ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_id")}</div>
+                <div className="whitespace-nowrap ">{row.getValue("employee_id")}</div>
             ),
         },
 
         {
-            accessorKey: "region_name",
-            header: "Region Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "region_code",
-            header: "Region Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "zone_name",
-            header: "Zone Name",
+            accessorKey: "full_name",
+            header: "Full Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('zone_name')?.getFilterValue() as string) || "";
-                const zoneName = row.getValue("zone_name") as string;
+                const filterValue = (table.getColumn('full_name')?.getFilterValue() as string) || "";
+                const fullName = row.getValue("full_name") as string;
 
-                if (filterValue && zoneName.toLowerCase().includes(filterValue.toLowerCase())) {
+                if (filterValue && fullName.toLowerCase().includes(filterValue.toLowerCase())) {
                     // Highlight matching text using regex
-                    const parts = zoneName.split(new RegExp(`(${filterValue})`, "gi"));
+                    const parts = fullName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap text-slate-700">
+                        <div className="whitespace-nowrap ">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -145,15 +132,107 @@ const RegionTable = (session: RegionTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap text-slate-700">{zoneName}</div>;
+                return <div className="whitespace-nowrap ">{fullName}</div>;
             },
         },
 
         {
-            accessorKey: "region_status",
+            accessorKey: "email",
+            header: "Email",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.original.email ? row.original.email : ""}</div>
+            ),
+        },
+
+        {
+            accessorKey: "contact",
+            header: "Contact",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("contact")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "present_address",
+            header: "Present Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("present_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_address",
+            header: "Permanent Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("permanent_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "joining_date",
+            header: "Joining Date",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.original.joining_date
+                    ? format(new Date(row.original.joining_date), 'yyyy-MM-dd')
+                    : 'N/A'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "place_name",
+            header: "Posting Place",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("place_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_date",
+            header: "Permanent Date",
+            cell: ({ row }) => (
+                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-yellow-200  font-bold border rounded-sm p-1"}>{row.original.permanent_date
+                    ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
+                    : 'Temporary Employee'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "designation_name",
+            header: "Designation Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("designation_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "department_name",
+            header: "Department Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("department_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "depot_name",
+            header: "Deport Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("depot_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "module_name",
+            header: "Module Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("module_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "employee_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("region_status") === 1;
+                const isActive = row.getValue("employee_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -163,13 +242,6 @@ const RegionTable = (session: RegionTableProps) => {
                     </Badge>
                 );
             },
-        },
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
-            ),
         },
 
         {
@@ -197,7 +269,7 @@ const RegionTable = (session: RegionTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.region_status === 1;
+                const isActive = row.original.employee_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -213,11 +285,11 @@ const RegionTable = (session: RegionTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateRegion
+                                    <DeactivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            regionTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -228,11 +300,11 @@ const RegionTable = (session: RegionTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateRegion
+                                    <ActivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            regionTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -244,12 +316,29 @@ const RegionTable = (session: RegionTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateRegionDialog
+                                Make Author
+                                {/* <ActivateEmployee
+                                    id={row.original.id}
+                                    accessToken={accessToken}
+                                    onActiveSuccess={() => {
+                                        employeeTableData({
+                                            itemsPerPage: pagination.pageSize,
+                                            currentPageNumber: pagination.pageIndex,
+                                            sortOrder: "asc",
+                                            filterBy: "",
+                                        });
+                                    }}
+                                /> */}
+                            </div>
+
+                            {/* <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                <UpdateZoneDialog
                                     rowData={row.original}
-                                    zoneData={zoneData}
+                                    depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        regionTableData({
+                                        getCountInformation();
+                                        zoneTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -257,13 +346,12 @@ const RegionTable = (session: RegionTableProps) => {
                                         });
                                     }}
                                 />
-                            </div>
+                            </div> */}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
             },
         }
-
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
@@ -275,9 +363,9 @@ const RegionTable = (session: RegionTableProps) => {
         }))
     }, [pagination])
 
-    const getZoneInformation = async () => {
+    const getModuleInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-zone`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-module`,
             {
                 method: 'GET',
                 headers: {
@@ -288,22 +376,101 @@ const RegionTable = (session: RegionTableProps) => {
         );
 
         const responseData = await response.json();
-        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
-
+        // console.warn('🚀 ~ getModuleInformation ~ responseData:', responseData);
         if (responseData.status === 'success') {
-            setZoneData(() => responseData?.data)
-            setIsLoading(false);
-
+            setModuleData(() => responseData?.data)
         } else {
-            setIsLoading(true);
             console.error(responseData.message);
         }
-        // setButtonDisable(false);
+    };
+
+    const getDesignationInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-designation`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDesignationInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDesignationData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getPostingInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-posting`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getPostingInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setPostingData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getDepartmentInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-department`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepartmentInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepartmentData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getDepotInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepotData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
     };
 
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-region-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-employee-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -314,17 +481,17 @@ const RegionTable = (session: RegionTableProps) => {
         );
 
         const responseData = await response.json();
-        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData);
         if (responseData.status === 'success') {
-            setRegionCount(() => responseData?.data)
+            setIdCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const regionTableData = async (paginationData: any) => {
+    const employeeTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/region/get-region-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/employees/get-employees-data`,
             {
                 method: 'POST',
                 headers: {
@@ -339,19 +506,20 @@ const RegionTable = (session: RegionTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            const regionData = responseData?.data?.data as Region[];
+            const employeeData = responseData?.data?.data as Employees[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => regionData)
+            setData(() => employeeData)
             setIsLoading(false)
         }
         else {
             console.error("fetch req failed: ", response)
         }
+
     }
 
     useEffect(() => {
@@ -362,9 +530,13 @@ const RegionTable = (session: RegionTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
-        getZoneInformation();
+        getModuleInformation();
+        getDepartmentInformation();
+        getDesignationInformation();
+        getDepotInformation();
         getCountInformation();
-        regionTableData({
+        getPostingInformation();
+        employeeTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -396,12 +568,12 @@ const RegionTable = (session: RegionTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full md:w-3/5"
-                        placeholder="Filter by Zone Name..."
+                        placeholder="Filter by Department Name..."
                         value={(
-                            table.getColumn('zone_name')?.getFilterValue() as string
+                            table.getColumn('full_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('zone_name')?.setFilterValue(event.target.value)
+                            table.getColumn('full_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
@@ -437,16 +609,20 @@ const RegionTable = (session: RegionTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateRegion
+                    <CreateEmployee
                         session={session}
-                        zoneData={zoneData}
-                        regionCount={regionCount}
+                        moduleData={moduleData}
+                        depotData={depotData}
+                        departmentData={departmentData}
+                        designationData={designationData}
+                        postingData={postingData}
+                        idCount={idCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            regionTableData({
+                            employeeTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "desc",
+                                sortOrder: "asc",
                                 filterBy: "",
                             });
                         }}
@@ -485,10 +661,10 @@ const RegionTable = (session: RegionTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('zone_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('full_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No data matched
                                 </TableCell>
                             </TableRow>
@@ -496,14 +672,14 @@ const RegionTable = (session: RegionTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -584,4 +760,4 @@ const RegionTable = (session: RegionTableProps) => {
     )
 }
 
-export default RegionTable;
+export default EmployeesTable;

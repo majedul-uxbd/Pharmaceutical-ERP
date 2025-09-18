@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ModuleInfo } from "@/utilities/module.enum";
 import { Metadata } from "next";
 import Link from "next/link";
-import EmployeesTable from "./employees-table/page";
+import EmployeesTable from "../../../../components/hrm-module/employees/employee-table";
 
 export const metadata: Metadata = {
     title: "Manage Employees",
@@ -30,9 +30,7 @@ const HrmModule = async () => {
     }
     else {
         return (
-            <div>
-                <EmployeesTable session={session?.user} />
-            </div>
+            <EmployeesTable session={session?.user} />
         );
     }
 }

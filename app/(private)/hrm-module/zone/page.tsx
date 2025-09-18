@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import ZoneTable from "./zone-table/page";
+import ZoneTable from "../../../../components/hrm-module/zone/zone-table";
 
 // interface ZoneProps {
 //     session: any;
@@ -9,9 +9,7 @@ const ZonePage = async () => {
     const session = await auth();
 
     return (
-        <div>
-            <ZoneTable session={session?.user} />
-        </div>
+        <ZoneTable session={session?.user} />
     )
 }
 

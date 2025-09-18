@@ -15,8 +15,6 @@ import {
 import { handleSignOut } from "@/app/(auth)/logout/handleLogout";
 
 const SignOutDialog = () => {
-  const [open, setOpen] = useState(false)
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {

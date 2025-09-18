@@ -1,6 +1,5 @@
 "use client";
 
-import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -18,11 +17,8 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-
     DropdownMenuLabel,
-
     DropdownMenuSeparator,
-
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,25 +29,28 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Set
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Designation } from "@/interfaces/designation.interface";
-import { CreateDesignation } from "@/components/hrm-module/designation/create/page";
-import ActivateDesignation from "@/components/hrm-module/designation/active/page";
-import DeactivateDesignation from "@/components/hrm-module/designation/deactivate/page";
-import UpdateDesignationDialog from "@/components/hrm-module/designation/update/page";
+import { Region } from "@/interfaces/region.interface";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Market } from "@/interfaces/market.interface";
+import { CreateMarket } from "@/components/hrm-module/market/create-market";
+import ActivateMarket from "@/components/hrm-module/market/active-market";
+import DeactivateMarket from "@/components/hrm-module/market/deactive-market";
+import UpdateMarketDialog from "@/components/hrm-module/market/update-market";
 
 
-
-interface DesignationTableProps {
+interface MarketTableProps {
     session: any;
 }
 
-const DesignationTable = (session: DesignationTableProps) => {
-    const accessToken = session?.session?.id;
+const MarketTable = (session: MarketTableProps) => {
+    console.log('🚀 ------------------------------------------🚀');
+    console.log('🚀 ~ :48 ~ MarketTable ~ session:', session);
+    console.log('🚀 ------------------------------------------🚀');
 
-    const [data, setData] = useState<Designation[]>([]);
+    const accessToken = session?.session.id;
+    const [data, setData] = useState<Market[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -61,7 +60,8 @@ const DesignationTable = (session: DesignationTableProps) => {
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [designationCount, setDesignationCount] = useState<any[]>([]);
+    const [regionData, setRegionData] = useState<Region[]>([]);
+    const [marketCount, setMarketCount] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -73,7 +73,7 @@ const DesignationTable = (session: DesignationTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Designation>[] = [
+    const columns: ColumnDef<Market>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -99,26 +99,42 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
-            accessorKey: "designation_id",
-            header: "Designation ID",
+            accessorKey: "market_id",
+            header: "Market ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("designation_id")}</div>
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_id")}</div>
             ),
         },
 
         {
-            accessorKey: "designation_name",
-            header: "Designation Name",
-            cell: ({ row }) => {
-                const filterValue = (table.getColumn('designation_name')?.getFilterValue() as string) || "";
-                const designationName = row.getValue("designation_name") as string;
+            accessorKey: "market_name",
+            header: "Market Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_name")}</div>
+            ),
+        },
 
-                if (filterValue && designationName.toLowerCase().includes(filterValue.toLowerCase())) {
+        {
+            accessorKey: "market_code",
+            header: "Market Code",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_code")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "region_name",
+            header: "Region Name",
+            cell: ({ row }) => {
+                const filterValue = (table.getColumn('region_name')?.getFilterValue() as string) || "";
+                const regionName = row.getValue("region_name") as string;
+
+                if (filterValue && regionName.toLowerCase().includes(filterValue.toLowerCase())) {
                     // Highlight matching text using regex
-                    const parts = designationName.split(new RegExp(`(${filterValue})`, "gi"));
+                    const parts = regionName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap">
+                        <div className="whitespace-nowrap text-slate-700">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -133,54 +149,15 @@ const DesignationTable = (session: DesignationTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap">{designationName}</div>;
+                return <div className="whitespace-nowrap text-slate-700">{regionName}</div>;
             },
         },
 
         {
-            accessorKey: "designation_code",
-            header: "Designation Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("designation_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "description",
-            header: "Description",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("description")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "created_by",
-            header: "Created By",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
-            ),
-        },
-        {
-            accessorKey: "modified_by",
-            header: "Modified By",
-            cell: ({ row }) => {
-                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
-            },
-        },
-
-        {
-            accessorKey: "designation_status",
+            accessorKey: "market_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("designation_status") === 1;
+                const isActive = row.getValue("market_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -190,6 +167,13 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </Badge>
                 );
             },
+        },
+        {
+            accessorKey: "comment",
+            header: "Comment",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+            ),
         },
 
         {
@@ -217,7 +201,8 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.designation_status === 1;
+                const isActive = row.original.market_status === 1;
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -229,13 +214,14 @@ const DesignationTable = (session: DesignationTableProps) => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
+
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateDesignation
+                                    <DeactivateMarket
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            designationTableData({
+                                            marketTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -246,11 +232,11 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateDesignation
+                                    <ActivateMarket
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            designationTableData({
+                                            marketTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -260,12 +246,14 @@ const DesignationTable = (session: DesignationTableProps) => {
                                     />
                                 </div>
                             )}
+
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateDesignationDialog
+                                <UpdateMarketDialog
                                     rowData={row.original}
+                                    regionData={regionData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        designationTableData({
+                                        marketTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -278,21 +266,42 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </DropdownMenu>
                 );
             },
-        },
+        }
+
     ]
 
-    const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
-        const factor = btnType === "next" ? 1 : -1;
+    const handlePaginationState = useCallback((btnType: "prev" | "next") => {
+        setPagination((prev) => {
+            const newIndex = btnType === "next" ? prev.pageIndex + 1 : Math.max(0, prev.pageIndex - 1);
+            return { ...prev, pageIndex: newIndex };
+        });
+    }, []);
 
-        setPagination((prev) => ({
-            ...prev,
-            pageIndex: prev.pageIndex + factor
-        }))
-    }, [pagination])
+
+    const getRegionInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-region`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getRegionInformation ~ responseData:', responseData.data);
+        if (responseData.status === 'success') {
+            setRegionData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
 
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-designation-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-market-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -305,15 +314,15 @@ const DesignationTable = (session: DesignationTableProps) => {
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
         if (responseData.status === 'success') {
-            setDesignationCount(() => responseData?.data)
+            setMarketCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const designationTableData = async (paginationData: any) => {
+    const marketTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/designation/get-designation-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/market/get-market-data`,
             {
                 method: 'POST',
                 headers: {
@@ -326,16 +335,20 @@ const DesignationTable = (session: DesignationTableProps) => {
             },
         );
 
+
         if (response.ok) {
             const responseData = await response.json();
-            const designationData = responseData?.data?.data as Designation[];
-            const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
+            const regionData = responseData?.data?.data as Market[];
+            const pageSize = pagination.pageSize || 10; // Default to 10 if pageSize is undefined
+            const pageCount = responseData?.data?.metadata?.totalRows
+                ? Math.ceil(responseData.data.metadata.totalRows / pageSize)
+                : 1;
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => designationData)
+            setData(() => regionData)
             setIsLoading(false)
         }
         else {
@@ -351,11 +364,12 @@ const DesignationTable = (session: DesignationTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
+        getRegionInformation();
         getCountInformation();
-        designationTableData({
+        marketTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
-            sortOrder: "desc",
+            sortOrder: "asc",
             filterBy: ""
         })
     }, [pagination]);
@@ -378,18 +392,19 @@ const DesignationTable = (session: DesignationTableProps) => {
             rowSelection,
         },
     })
+
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-2/5"
-                        placeholder="Filter by Designation Name..."
+                        className="w-full md:w-3/5"
+                        placeholder="Filter by Region Name..."
                         value={(
-                            table.getColumn('designation_name')?.getFilterValue() as string
+                            table.getColumn('region_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('designation_name')?.setFilterValue(event.target.value)
+                            table.getColumn('region_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
@@ -425,15 +440,16 @@ const DesignationTable = (session: DesignationTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateDesignation
+                    <CreateMarket
                         session={session}
-                        designationCount={designationCount}
+                        regionData={regionData}
+                        marketCount={marketCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            designationTableData({
+                            marketTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "asc",
+                                sortOrder: "desc",
                                 filterBy: "",
                             });
                         }}
@@ -443,9 +459,9 @@ const DesignationTable = (session: DesignationTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b">
+                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -472,7 +488,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('designation_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
@@ -483,7 +499,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -533,14 +549,12 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </div>
                     {/* Pagination Controls */}
                     <div className="flex w-full gap-4 md:flex-row md:items-center justify-between md:w-auto">
-
                         {/* Current Page Info and Navigation */}
                         <div className="flex flex-row justify-between text-sm items-center gap-4 md:flex-row md:gap-8">
                             Page {pagination.pageIndex + 1} of{' '}
                             {totalPage}
                         </div>
                         <div className="flex items-center space-x-2">
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-24 p-2"
@@ -553,7 +567,6 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Previous
                             </Button>
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-16 p-2"
@@ -562,7 +575,6 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 }}
                                 disabled={pagination.pageIndex + 1 === totalPage}
                             >
-
                                 <span className="sr-only">Go to next page</span>
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
@@ -575,4 +587,4 @@ const DesignationTable = (session: DesignationTableProps) => {
     )
 }
 
-export default DesignationTable;
+export default MarketTable;

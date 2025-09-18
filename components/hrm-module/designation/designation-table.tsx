@@ -1,5 +1,6 @@
 "use client";
 
+import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -17,8 +18,11 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
+
     DropdownMenuLabel,
+
     DropdownMenuSeparator,
+
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,21 +33,25 @@ import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Set
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zone } from "@/interfaces/zone.interface";
-import { CreateZone } from "@/components/hrm-module/zone/create/page";
-import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
-import ActivateZone from "@/components/hrm-module/zone/active/page";
-import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
+import { Designation } from "@/interfaces/designation.interface";
+import { CreateDesignation } from "@/components/hrm-module/designation/create-designation";
+import ActivateDesignation from "@/components/hrm-module/designation/active-designation";
+import DeactivateDesignation from "@/components/hrm-module/designation/deactive-designation";
+import UpdateDesignationDialog from "@/components/hrm-module/designation/update-designation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-interface ZoneTableProps {
+
+
+
+interface DesignationTableProps {
     session: any;
 }
 
-const ZoneTable = (session: ZoneTableProps) => {
-    const accessToken = session?.session.id;
-    const [data, setData] = useState<Zone[]>([]);
+const DesignationTable = (session: DesignationTableProps) => {
+    const accessToken = session?.session?.id;
+
+    const [data, setData] = useState<Designation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -53,8 +61,8 @@ const ZoneTable = (session: ZoneTableProps) => {
     })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [depotData, setDepotData] = useState<Zone[]>([]);
-    const [zoneCount, setZoneCount] = useState<any[]>([]);
+    const [designationCount, setDesignationCount] = useState<any[]>([]);
+    // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
             if (typeof window !== "undefined") {
@@ -65,7 +73,7 @@ const ZoneTable = (session: ZoneTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Zone>[] = [
+    const columns: ColumnDef<Designation>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -91,42 +99,26 @@ const ZoneTable = (session: ZoneTableProps) => {
         },
 
         {
-            accessorKey: "zone_id",
-            header: "Zone ID",
+            accessorKey: "designation_id",
+            header: "Designation ID",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_id")}</div>
+                <div className="whitespace-nowrap">{row.getValue("designation_id")}</div>
             ),
         },
 
         {
-            accessorKey: "zone_name",
-            header: "Zone Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_name")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "zone_code",
-            header: "Zone Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "depot_name",
-            header: "Depot Name",
+            accessorKey: "designation_name",
+            header: "Designation Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('depot_name')?.getFilterValue() as string) || "";
-                const depotName = row.getValue("depot_name") as string;
+                const filterValue = (table.getColumn('designation_name')?.getFilterValue() as string) || "";
+                const designationName = row.getValue("designation_name") as string;
 
-                if (filterValue && depotName.toLowerCase().includes(filterValue.toLowerCase())) {
+                if (filterValue && designationName.toLowerCase().includes(filterValue.toLowerCase())) {
                     // Highlight matching text using regex
-                    const parts = depotName.split(new RegExp(`(${filterValue})`, "gi"));
+                    const parts = designationName.split(new RegExp(`(${filterValue})`, "gi"));
 
                     return (
-                        <div className="whitespace-nowrap text-slate-700">
+                        <div className="whitespace-nowrap">
                             {parts.map((part, index) => (
                                 <span
                                     key={index}
@@ -141,15 +133,54 @@ const ZoneTable = (session: ZoneTableProps) => {
                     );
                 }
 
-                return <div className="whitespace-nowrap text-slate-700">{depotName}</div>;
+                return <div className="whitespace-nowrap">{designationName}</div>;
             },
         },
 
         {
-            accessorKey: "zone_status",
+            accessorKey: "designation_code",
+            header: "Designation Code",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("designation_code")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "description",
+            header: "Description",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("description")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "comment",
+            header: "Comment",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "created_by",
+            header: "Created By",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
+            ),
+        },
+        {
+            accessorKey: "modified_by",
+            header: "Modified By",
+            cell: ({ row }) => {
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
+            },
+        },
+
+        {
+            accessorKey: "designation_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("zone_status") === 1;
+                const isActive = row.getValue("designation_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -159,13 +190,6 @@ const ZoneTable = (session: ZoneTableProps) => {
                     </Badge>
                 );
             },
-        },
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
-            ),
         },
 
         {
@@ -193,8 +217,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.zone_status === 1;
-
+                const isActive = row.original.designation_status === 1;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -206,14 +229,13 @@ const ZoneTable = (session: ZoneTableProps) => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateZone
+                                    <DeactivateDesignation
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            zoneTableData({
+                                            designationTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -224,11 +246,11 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateZone
+                                    <ActivateDesignation
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            zoneTableData({
+                                            designationTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -238,15 +260,12 @@ const ZoneTable = (session: ZoneTableProps) => {
                                     />
                                 </div>
                             )}
-
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateZoneDialog
+                                <UpdateDesignationDialog
                                     rowData={row.original}
-                                    depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        getCountInformation();
-                                        zoneTableData({
+                                        designationTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -259,8 +278,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                     </DropdownMenu>
                 );
             },
-        }
-
+        },
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
@@ -272,35 +290,9 @@ const ZoneTable = (session: ZoneTableProps) => {
         }))
     }, [pagination])
 
-    const getDepotInformation = async () => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const responseData = await response.json();
-        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
-
-        if (responseData.status === 'success') {
-            setDepotData(() => responseData?.data)
-            setIsLoading(false);
-
-        } else {
-            setIsLoading(true);
-            console.error(responseData.message);
-        }
-        // setButtonDisable(false);
-    };
-
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-designation-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -312,18 +304,16 @@ const ZoneTable = (session: ZoneTableProps) => {
 
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
-
         if (responseData.status === 'success') {
-            setZoneCount(() => responseData?.data)
-
+            setDesignationCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const zoneTableData = async (paginationData: any) => {
+    const designationTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/get-zone-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/designation/get-designation-data`,
             {
                 method: 'POST',
                 headers: {
@@ -336,17 +326,16 @@ const ZoneTable = (session: ZoneTableProps) => {
             },
         );
 
-
         if (response.ok) {
             const responseData = await response.json();
-            const zoneData = responseData?.data?.data as Zone[];
+            const designationData = responseData?.data?.data as Designation[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => zoneData)
+            setData(() => designationData)
             setIsLoading(false)
         }
         else {
@@ -362,12 +351,11 @@ const ZoneTable = (session: ZoneTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
-        getDepotInformation();
         getCountInformation();
-        zoneTableData({
+        designationTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
-            sortOrder: "asc",
+            sortOrder: "desc",
             filterBy: ""
         })
     }, [pagination]);
@@ -395,13 +383,13 @@ const ZoneTable = (session: ZoneTableProps) => {
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Depot Name..."
+                        className="w-2/5"
+                        placeholder="Filter by Designation Name..."
                         value={(
-                            table.getColumn('depot_name')?.getFilterValue() as string
+                            table.getColumn('designation_name')?.getFilterValue() as string
                         ) ?? ''}
                         onChange={(event) =>
-                            table.getColumn('depot_name')?.setFilterValue(event.target.value)
+                            table.getColumn('designation_name')?.setFilterValue(event.target.value)
                         }
                     />
                 </div>
@@ -437,13 +425,12 @@ const ZoneTable = (session: ZoneTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateZone
+                    <CreateDesignation
                         session={session}
-                        depotData={depotData}
-                        zoneCount={zoneCount}
+                        designationCount={designationCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            zoneTableData({
+                            designationTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
                                 sortOrder: "asc",
@@ -456,9 +443,9 @@ const ZoneTable = (session: ZoneTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -485,7 +472,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('depot_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('designation_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
@@ -496,7 +483,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -546,12 +533,14 @@ const ZoneTable = (session: ZoneTableProps) => {
                     </div>
                     {/* Pagination Controls */}
                     <div className="flex w-full gap-4 md:flex-row md:items-center justify-between md:w-auto">
+
                         {/* Current Page Info and Navigation */}
                         <div className="flex flex-row justify-between text-sm items-center gap-4 md:flex-row md:gap-8">
                             Page {pagination.pageIndex + 1} of{' '}
                             {totalPage}
                         </div>
                         <div className="flex items-center space-x-2">
+
                             <Button
                                 variant="outline"
                                 className="h-8 w-24 p-2"
@@ -564,6 +553,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Previous
                             </Button>
+
                             <Button
                                 variant="outline"
                                 className="h-8 w-16 p-2"
@@ -572,6 +562,7 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 }}
                                 disabled={pagination.pageIndex + 1 === totalPage}
                             >
+
                                 <span className="sr-only">Go to next page</span>
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
@@ -584,4 +575,4 @@ const ZoneTable = (session: ZoneTableProps) => {
     )
 }
 
-export default ZoneTable;
+export default DesignationTable;

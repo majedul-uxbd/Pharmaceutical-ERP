@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import DepartmentTable from "./department-table/page";
+import DepartmentTable from "../../../../components/hrm-module/department/department-table";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
