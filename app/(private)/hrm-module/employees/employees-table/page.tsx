@@ -179,7 +179,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "permanent_date",
             header: "Permanent Date",
             cell: ({ row }) => (
-                <div className={row.original.permanent_date ? "text-slate-700" : "whitespace-nowrap bg-yellow-300 text-slate-700 font-bold border p-1"}>{row.original.permanent_date
+                <div className={row.original.permanent_date ? "text-slate-700" : "whitespace-nowrap bg-yellow-200 text-slate-700 font-bold border rounded-sm p-1"}>{row.original.permanent_date
                     ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
                     : 'Temporary Employee'}</div>
             ),
@@ -303,6 +303,22 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                                     />
                                 </div>
                             )}
+
+                            <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                Make Author
+                                {/* <ActivateEmployee
+                                    id={row.original.id}
+                                    accessToken={accessToken}
+                                    onActiveSuccess={() => {
+                                        employeeTableData({
+                                            itemsPerPage: pagination.pageSize,
+                                            currentPageNumber: pagination.pageIndex,
+                                            sortOrder: "asc",
+                                            filterBy: "",
+                                        });
+                                    }}
+                                /> */}
+                            </div>
 
                             {/* <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
                                 <UpdateZoneDialog

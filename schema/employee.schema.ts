@@ -45,8 +45,8 @@ export const CreateSchema = z.object({
     permanent_date: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
-        .optional() // Making it optional
-        .or(z.literal("")), // Allow empty string
+        .optional()
+        .or(z.literal("")),
     posting_place: z
         .string()
         .min(1, {
