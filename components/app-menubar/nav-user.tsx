@@ -22,6 +22,7 @@ import React from "react";
 import { useProfileNameStore, useProfileStore } from "@/assets/store";
 import SignOutDialog from "../shared/logout-dialog";
 import { Badge } from "../ui/badge";
+import { ModeToggle } from "../shared/mode-toggle";
 
 export function NavUser({ session }: any) {
     const imageUrl = useProfileStore((state: any) => state.imageUrl);
@@ -48,13 +49,13 @@ export function NavUser({ session }: any) {
                             />
                         </AvatarFallback>
                     </Avatar>
-                    <div className="ml-5 grid flex-1 text-left text-sm">
+                    {/* <div className="ml-5 grid flex-1 text-left text-sm">
                         <span className="truncate font-semibold">{full_name || session?.full_name}</span>
                         <span className="truncate text-[11px] uppercase">
                             {session?.designation_name || "Unknown"}
                         </span>
-                    </div>
-                    <ChevronsUpDown className="ml-auto size-4" />
+                    </div> */}
+                    {/* <ChevronsUpDown className="ml-auto size-4" /> */}
                 </div>
             </PopoverTrigger>
             <PopoverContent

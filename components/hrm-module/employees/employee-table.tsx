@@ -189,7 +189,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "permanent_date",
             header: "Permanent Date",
             cell: ({ row }) => (
-                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-yellow-200  font-bold border rounded-sm p-1"}>{row.original.permanent_date
+                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-yellow-200 dark:text-yellow-700  font-bold border rounded-sm p-1"}>{row.original.permanent_date
                     ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
                     : 'Temporary Employee'}</div>
             ),

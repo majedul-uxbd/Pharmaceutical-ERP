@@ -4,6 +4,7 @@ import Link from "next/";
 import { HousePlus } from "lucide-react";
 import React from "react";
 import { ModeToggle } from "../shared/mode-toggle";
+import { NavUser } from "./nav-user";
 
 const Header = ({ session }: { session: any }) => {
 	return (
@@ -28,8 +29,10 @@ const Header = ({ session }: { session: any }) => {
 						<span className="text-lg font-semibold">ERP System</span>
 					</div>
 				</div>
-
-				<ModeToggle />
+				<div className="flex">
+					<ModeToggle />
+					<NavUser session={session?.user} />
+				</div>
 			</div>
 		</header>
 
