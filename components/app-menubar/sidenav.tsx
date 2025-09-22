@@ -10,6 +10,7 @@ import {
 	Settings2,
 	StoreIcon,
 	UsersRound,
+	Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -110,7 +111,7 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 					{(session?.module_id === ModuleInfo[2].value) && (
 						<>
 							{/* Dashboard Menu Item */}
-							<Menu className="h-full" menuItemStyles={{
+							{/* <Menu className="h-full" menuItemStyles={{
 								button: {
 									'&:hover': {
 										backgroundColor: 'transparent', // removes hover color
@@ -139,6 +140,39 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 								>
 									<p className="text-[14px]">
 										Dashboard
+									</p>
+								</MenuItem>
+							</Menu> */}
+							{/* Employees Menu Item */}
+							<Menu menuItemStyles={{
+								button: {
+									'&:hover': {
+										backgroundColor: 'transparent', // removes hover color
+									},
+								},
+							}}>
+								<MenuItem
+									component={<Link href="/hrm-module/employees" />}
+									className={cn(isActiveRoute("/hrm-module/employees") && "bg-accent")}
+									icon={
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<UsersRound className="size-4" />
+												</TooltipTrigger>
+												<TooltipContent
+													side="right"
+													align="center"
+													className="border p-2"
+												>
+													Employees
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									}
+								>
+									<p className="text-[14px]">
+										Employees
 									</p>
 								</MenuItem>
 							</Menu>
@@ -226,7 +260,6 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 									</MenuItem>
 								</SubMenu>
 							</Menu>
-							{/* Employees Menu Item */}
 							<Menu menuItemStyles={{
 								button: {
 									'&:hover': {
@@ -234,30 +267,82 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 									},
 								},
 							}}>
-								<MenuItem
-									component={<Link href="/hrm-module/employees" />}
-									className={cn(isActiveRoute("/hrm-module/employees") && "bg-accent")}
+								<SubMenu
+									className="cursor-pointer text-[14px]"
 									icon={
 										<TooltipProvider>
 											<Tooltip>
 												<TooltipTrigger asChild>
-													<UsersRound className="size-4" />
+													<Wallet className="size-4" />
 												</TooltipTrigger>
 												<TooltipContent
 													side="right"
 													align="center"
 													className="border p-2"
 												>
-													Employees
+													Payroll
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
 									}
+									label="Payroll"
 								>
-									<p className="text-[14px]">
-										Employees
-									</p>
-								</MenuItem>
+									<MenuItem className="dark:bg-black">
+										<Link
+											className={cn(
+												isActiveRoute("/hrm-module/department") && "bg-accent p-2 cursor-pointer",
+												"flex items-center text-[13px] gap-2"
+											)}
+											href="/hrm-module/department"
+										>
+											<BriefcaseBusiness className="size-4" /> Department
+										</Link>
+									</MenuItem>
+									<MenuItem className="dark:bg-black">
+										<Link
+											className={cn(
+												isActiveRoute("/hrm-module/designation") && "bg-accent p-2 cursor-pointer",
+												"flex items-center text-[13px] gap-2"
+											)}
+											href="/hrm-module/designation"
+										>
+											<Presentation className="size-4" /> Designation
+										</Link>
+									</MenuItem>
+									<MenuItem className="dark:bg-black">
+										<Link
+											className={cn(
+												isActiveRoute("/hrm-module/zone") && "bg-accent p-2 cursor-pointer",
+												"flex items-center text-[13px] gap-2"
+											)}
+											href="/hrm-module/zone"
+										>
+											<MapPin className="size-4" /> Zone
+										</Link>
+									</MenuItem>
+									<MenuItem className="dark:bg-black">
+										<Link
+											className={cn(
+												isActiveRoute("/hrm-module/region") && "bg-accent p-2 cursor-pointer",
+												"flex items-center text-[13px] gap-2"
+											)}
+											href="/hrm-module/region"
+										>
+											<Map className="size-4" /> Region
+										</Link>
+									</MenuItem>
+									<MenuItem className="dark:bg-black">
+										<Link
+											className={cn(
+												isActiveRoute("/hrm-module/market") && "bg-accent p-2 cursor-pointer",
+												"flex items-center text-[13px] gap-2"
+											)}
+											href="/hrm-module/market"
+										>
+											<StoreIcon className="size-4" /> Market
+										</Link>
+									</MenuItem>
+								</SubMenu>
 							</Menu>
 						</>
 					)}
