@@ -15,7 +15,7 @@ export interface Employees {
     department_name: string;
     depot_name: string;
     module_name: string;
-    employee_status: number;
+    active_status: number;
     created_at: Date;
     modified_at: Date | null;
 }

@@ -5,7 +5,9 @@ export interface Zone {
     zone_code: string;
     zone_name: string;
     comment: string | null;
-    zone_status: number;
+    created_by: string;
+    modified_by: string | null;
+    active_status: number;
     created_at: Date;
     modified_at: Date | null;
 }

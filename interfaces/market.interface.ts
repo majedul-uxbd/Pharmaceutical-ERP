@@ -5,7 +5,9 @@ export interface Market {
     market_code: string;
     market_name: string;
     comment: string | null;
-    market_status: number;
+    created_by: string;
+    modified_by: string | null;
+    active_status: number;
     created_at: Date;
     modified_at: Date | null;
 }

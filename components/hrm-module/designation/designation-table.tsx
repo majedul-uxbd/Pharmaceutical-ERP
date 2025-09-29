@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon, ChevronsUpDown, ChevronUp, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -69,11 +69,13 @@ const DesignationTable = (session: DesignationTableProps) => {
     const [data, setData] = useState<Designation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
-    const [sorting, setSorting] = useState<SortingState>([])
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     })
+    const [sorting, setSorting] = useState<SortingState>([
+        { id: "designation_id", desc: false }, // default ascending
+    ]);
     const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
@@ -116,9 +118,32 @@ const DesignationTable = (session: DesignationTableProps) => {
 
         {
             accessorKey: "designation_id",
-            header: "Designation ID",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Designation ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("designation_id")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("designation_id")}
+                </div>
             ),
         },
 
@@ -172,10 +197,10 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
-            accessorKey: "designation_status",
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("designation_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -212,7 +237,7 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.designation_status === 1;
+                const isActive = row.original.active_status === 1;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
