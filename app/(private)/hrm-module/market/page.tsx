@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import MarketTable from "./market-table/page";
+import MarketTable from "../../../../components/hrm-module/market/market-table";
 
 const MarketPage = async () => {
     const session = await auth();

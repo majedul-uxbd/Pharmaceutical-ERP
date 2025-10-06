@@ -25,36 +25,62 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zone } from "@/interfaces/zone.interface";
-import { CreateZone } from "@/components/hrm-module/zone/create/page";
-import DeactivateZone from "@/components/hrm-module/zone/deactivate/page";
-import ActivateZone from "@/components/hrm-module/zone/active/page";
-import UpdateZoneDialog from "@/components/hrm-module/zone/update/page";
+import { Region } from "@/interfaces/region.interface";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-interface ZoneTableProps {
+import { Market } from "@/interfaces/market.interface";
+import { CreateMarket } from "@/components/hrm-module/market/create-market";
+import ActivateMarket from "@/components/hrm-module/market/active-market";
+import DeactivateMarket from "@/components/hrm-module/market/deactive-market";
+import UpdateMarketDialog from "@/components/hrm-module/market/update-market";
+
+
+interface MarketTableProps {
     session: any;
 }
 
-const ZoneTable = (session: ZoneTableProps) => {
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
+const MarketTable = (session: MarketTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Zone[]>([]);
+    const [data, setData] = useState<Market[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
-    const [sorting, setSorting] = useState<SortingState>([])
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [sorting, setSorting] = useState<SortingState>([
+        // { id: "market_id", desc: false }, // default ascending
+    ]);
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [depotData, setDepotData] = useState<Zone[]>([]);
-    const [zoneCount, setZoneCount] = useState<any[]>([]);
+    const [regionData, setRegionData] = useState<Region[]>([]);
+    const [marketCount, setMarketCount] = useState<any[]>([]);
+    // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
             if (typeof window !== "undefined") {
@@ -65,7 +91,7 @@ const ZoneTable = (session: ZoneTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Zone>[] = [
+    const columns: ColumnDef<Market>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -91,65 +117,105 @@ const ZoneTable = (session: ZoneTableProps) => {
         },
 
         {
-            accessorKey: "zone_id",
-            header: "Zone ID",
+            accessorKey: "market_id",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Market ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_id")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("market_id")}
+                </div>
             ),
         },
 
         {
-            accessorKey: "zone_name",
-            header: "Zone Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_name")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "zone_code",
-            header: "Zone Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("zone_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "depot_name",
-            header: "Depot Name",
+            accessorKey: "market_name",
+            header: "Market Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('depot_name')?.getFilterValue() as string) || "";
-                const depotName = row.getValue("depot_name") as string;
-
-                if (filterValue && depotName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = depotName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{depotName}</div>;
+                const marketName = row.getValue("market_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(marketName, globalFilter)}</div>;
             },
         },
 
         {
-            accessorKey: "zone_status",
+            accessorKey: "market_code",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Market Code
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\M/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\M/g, ""), 10);
+                return numA - numB;
+            },
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">
+                    {row.getValue("market_code")}
+                </div>
+            ),
+        },
+
+        {
+            accessorKey: "region_name",
+            header: "Region Name",
+            cell: ({ row }) => {
+                const regionName = row.getValue("region_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(regionName, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "created_by",
+            header: "Created By",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
+            ),
+        },
+        {
+            accessorKey: "modified_by",
+            header: "Modified By",
+            cell: ({ row }) => {
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
+            },
+        },
+
+        {
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("zone_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -164,7 +230,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
             ),
         },
 
@@ -193,7 +259,7 @@ const ZoneTable = (session: ZoneTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.zone_status === 1;
+                const isActive = row.original.active_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -209,11 +275,11 @@ const ZoneTable = (session: ZoneTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateZone
+                                    <DeactivateMarket
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            zoneTableData({
+                                            marketTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -224,11 +290,11 @@ const ZoneTable = (session: ZoneTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateZone
+                                    <ActivateMarket
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            zoneTableData({
+                                            marketTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -240,13 +306,12 @@ const ZoneTable = (session: ZoneTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateZoneDialog
+                                <UpdateMarketDialog
                                     rowData={row.original}
-                                    depotData={depotData}
+                                    regionData={regionData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        getCountInformation();
-                                        zoneTableData({
+                                        marketTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -263,18 +328,17 @@ const ZoneTable = (session: ZoneTableProps) => {
 
     ]
 
-    const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
-        const factor = btnType === "next" ? 1 : -1;
+    const handlePaginationState = useCallback((btnType: "prev" | "next") => {
+        setPagination((prev) => {
+            const newIndex = btnType === "next" ? prev.pageIndex + 1 : Math.max(0, prev.pageIndex - 1);
+            return { ...prev, pageIndex: newIndex };
+        });
+    }, []);
 
-        setPagination((prev) => ({
-            ...prev,
-            pageIndex: prev.pageIndex + factor
-        }))
-    }, [pagination])
 
-    const getDepotInformation = async () => {
+    const getRegionInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-region`,
             {
                 method: 'GET',
                 headers: {
@@ -285,22 +349,17 @@ const ZoneTable = (session: ZoneTableProps) => {
         );
 
         const responseData = await response.json();
-        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
-
+        // console.warn('🚀 ~ getRegionInformation ~ responseData:', responseData.data);
         if (responseData.status === 'success') {
-            setDepotData(() => responseData?.data)
-            setIsLoading(false);
-
+            setRegionData(() => responseData?.data)
         } else {
-            setIsLoading(true);
             console.error(responseData.message);
         }
-        // setButtonDisable(false);
     };
 
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-market-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -312,18 +371,16 @@ const ZoneTable = (session: ZoneTableProps) => {
 
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
-
         if (responseData.status === 'success') {
-            setZoneCount(() => responseData?.data)
-
+            setMarketCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const zoneTableData = async (paginationData: any) => {
+    const marketTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/get-zone-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/market/get-market-data`,
             {
                 method: 'POST',
                 headers: {
@@ -339,14 +396,17 @@ const ZoneTable = (session: ZoneTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            const zoneData = responseData?.data?.data as Zone[];
-            const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
+            const regionData = responseData?.data?.data as Market[];
+            const pageSize = pagination.pageSize || 10; // Default to 10 if pageSize is undefined
+            const pageCount = responseData?.data?.metadata?.totalRows
+                ? Math.ceil(responseData.data.metadata.totalRows / pageSize)
+                : 1;
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => zoneData)
+            setData(() => regionData)
             setIsLoading(false)
         }
         else {
@@ -362,9 +422,9 @@ const ZoneTable = (session: ZoneTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
-        getDepotInformation();
+        getRegionInformation();
         getCountInformation();
-        zoneTableData({
+        marketTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -388,24 +448,23 @@ const ZoneTable = (session: ZoneTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
+
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Depot Name..."
-                        value={(
-                            table.getColumn('depot_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('depot_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Market name or Code or Region name..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
@@ -437,16 +496,16 @@ const ZoneTable = (session: ZoneTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateZone
-                        session={session}
-                        depotData={depotData}
-                        zoneCount={zoneCount}
+                    <CreateMarket
+                        accessToken={accessToken}
+                        regionData={regionData}
+                        marketCount={marketCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            zoneTableData({
+                            marketTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "asc",
+                                sortOrder: "desc",
                                 filterBy: "",
                             });
                         }}
@@ -456,9 +515,9 @@ const ZoneTable = (session: ZoneTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -485,10 +544,10 @@ const ZoneTable = (session: ZoneTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('depot_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center ">
                                     No data matched
                                 </TableCell>
                             </TableRow>
@@ -496,14 +555,14 @@ const ZoneTable = (session: ZoneTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -584,4 +643,4 @@ const ZoneTable = (session: ZoneTableProps) => {
     )
 }
 
-export default ZoneTable;
+export default MarketTable;

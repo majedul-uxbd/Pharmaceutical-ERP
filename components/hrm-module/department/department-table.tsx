@@ -1,5 +1,6 @@
 "use client";
 
+import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -21,47 +22,63 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Region } from "@/interfaces/region.interface";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Market } from "@/interfaces/market.interface";
-import { CreateMarket } from "@/components/hrm-module/market/create/page";
-import ActivateMarket from "@/components/hrm-module/market/active/page";
-import DeactivateMarket from "@/components/hrm-module/market/deactivate/page";
-import UpdateMarketDialog from "@/components/hrm-module/market/update/page";
+import { CreateDepartment } from "@/components/hrm-module/department/create-department";
+import DeactivateDepartment from "@/components/hrm-module/department/deactive-department";
+import ActivateDepartment from "@/components/hrm-module/department/active-department";
+import UpdateDepartmentDialog from "@/components/hrm-module/department/update-department";
 
-
-interface MarketTableProps {
+interface DepartmentTableProps {
     session: any;
 }
 
-const MarketTable = (session: MarketTableProps) => {
-    console.log('🚀 ------------------------------------------🚀');
-    console.log('🚀 ~ :48 ~ MarketTable ~ session:', session);
-    console.log('🚀 ------------------------------------------🚀');
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
 
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
+const DepartmentTable = (session: DepartmentTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Market[]>([]);
+    const [data, setData] = useState<Department[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
-    const [sorting, setSorting] = useState<SortingState>([])
+    const [sorting, setSorting] = useState<SortingState>([
+        { id: "department_id", desc: false }, // default ascending
+    ]);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     })
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [regionData, setRegionData] = useState<Region[]>([]);
-    const [marketCount, setMarketCount] = useState<any[]>([]);
+    const [deptCount, setDeptCount] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -73,7 +90,7 @@ const MarketTable = (session: MarketTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Market>[] = [
+    const columns: ColumnDef<Department>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -99,65 +116,81 @@ const MarketTable = (session: MarketTableProps) => {
         },
 
         {
-            accessorKey: "market_id",
-            header: "Market ID",
+            accessorKey: "department_id",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Designation ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_id")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("department_id")}
+                </div>
             ),
         },
 
         {
-            accessorKey: "market_name",
-            header: "Market Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_name")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "market_code",
-            header: "Market Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("market_code")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "region_name",
-            header: "Region Name",
+            accessorKey: "department_name",
+            header: "Department Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('region_name')?.getFilterValue() as string) || "";
-                const regionName = row.getValue("region_name") as string;
-
-                if (filterValue && regionName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = regionName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{regionName}</div>;
+                const departmentName = row.getValue("department_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(departmentName, globalFilter)}</div>;
             },
         },
 
         {
-            accessorKey: "market_status",
+            accessorKey: "department_code",
+            header: "Department Code",
+            cell: ({ row }) => {
+                const departmentCode = row.getValue("department_code") as string;
+                return <div className="whitespace-nowrap">{highlightText(departmentCode, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "comment",
+            header: "Comment",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
+            ),
+        },
+        {
+            accessorKey: "created_by",
+            header: "Created By",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
+            ),
+        },
+        {
+            accessorKey: "modified_by",
+            header: "Modified By",
+            cell: ({ row }) => {
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
+            },
+        },
+
+        {
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("market_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -167,13 +200,6 @@ const MarketTable = (session: MarketTableProps) => {
                     </Badge>
                 );
             },
-        },
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
-            ),
         },
 
         {
@@ -201,7 +227,7 @@ const MarketTable = (session: MarketTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.market_status === 1;
+                const isActive = row.original.active_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -217,11 +243,11 @@ const MarketTable = (session: MarketTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateMarket
+                                    <DeactivateDepartment
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            marketTableData({
+                                            departmentTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -232,11 +258,11 @@ const MarketTable = (session: MarketTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateMarket
+                                    <ActivateDepartment
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            marketTableData({
+                                            departmentTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -248,12 +274,11 @@ const MarketTable = (session: MarketTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateMarketDialog
+                                <UpdateDepartmentDialog
                                     rowData={row.original}
-                                    regionData={regionData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        marketTableData({
+                                        departmentTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -270,38 +295,18 @@ const MarketTable = (session: MarketTableProps) => {
 
     ]
 
-    const handlePaginationState = useCallback((btnType: "prev" | "next") => {
-        setPagination((prev) => {
-            const newIndex = btnType === "next" ? prev.pageIndex + 1 : Math.max(0, prev.pageIndex - 1);
-            return { ...prev, pageIndex: newIndex };
-        });
-    }, []);
+    const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
+        const factor = btnType === "next" ? 1 : -1;
 
-
-    const getRegionInformation = async () => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-region`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const responseData = await response.json();
-        // console.warn('🚀 ~ getRegionInformation ~ responseData:', responseData.data);
-        if (responseData.status === 'success') {
-            setRegionData(() => responseData?.data)
-        } else {
-            console.error(responseData.message);
-        }
-    };
+        setPagination((prev) => ({
+            ...prev,
+            pageIndex: prev.pageIndex + factor
+        }))
+    }, [pagination])
 
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-market-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-department-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -312,17 +317,16 @@ const MarketTable = (session: MarketTableProps) => {
         );
 
         const responseData = await response.json();
-        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
         if (responseData.status === 'success') {
-            setMarketCount(() => responseData?.data)
+            setDeptCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const marketTableData = async (paginationData: any) => {
+    const departmentTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/market/get-market-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
             {
                 method: 'POST',
                 headers: {
@@ -338,22 +342,20 @@ const MarketTable = (session: MarketTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            const regionData = responseData?.data?.data as Market[];
-            const pageSize = pagination.pageSize || 10; // Default to 10 if pageSize is undefined
-            const pageCount = responseData?.data?.metadata?.totalRows
-                ? Math.ceil(responseData.data.metadata.totalRows / pageSize)
-                : 1;
+            const departmentData = responseData?.data?.data as Department[];
+            const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => regionData)
+            setData(() => departmentData)
             setIsLoading(false)
         }
         else {
             console.error("fetch req failed: ", response)
         }
+
     }
 
     useEffect(() => {
@@ -364,9 +366,8 @@ const MarketTable = (session: MarketTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
-        getRegionInformation();
         getCountInformation();
-        marketTableData({
+        departmentTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -390,26 +391,22 @@ const MarketTable = (session: MarketTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
-
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Region Name..."
-                        value={(
-                            table.getColumn('region_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('region_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Department name or Code..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
-                    {/* Column Toggle Popover */}
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" size="default" className="flex items-center gap-2">
@@ -440,16 +437,15 @@ const MarketTable = (session: MarketTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateMarket
+                    <CreateDepartment
                         session={session}
-                        regionData={regionData}
-                        marketCount={marketCount}
+                        deptCount={deptCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            marketTableData({
+                            departmentTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "desc",
+                                sortOrder: "asc",
                                 filterBy: "",
                             });
                         }}
@@ -459,12 +455,12 @@ const MarketTable = (session: MarketTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
-                                        className="text-center font-bold"
+                                        className="text-center font-bold border bg-accent"
                                         key={header.id}
                                     >
                                         {header.isPlaceholder
@@ -488,25 +484,25 @@ const MarketTable = (session: MarketTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('region_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getState().globalFilter ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No data matched
                                 </TableCell>
                             </TableRow>
                         ) : data.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow className="text-center" key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -514,8 +510,6 @@ const MarketTable = (session: MarketTableProps) => {
                         )}
                     </TableBody>
                 </Table>
-
-
             </div>
             <div className="flex items-center justify-between py-2 border rounded-b-md px-2">
                 <div className="flex-1 hidden sm:block text-sm text-muted-foreground">
@@ -587,4 +581,4 @@ const MarketTable = (session: MarketTableProps) => {
     )
 }
 
-export default MarketTable;
+export default DepartmentTable;

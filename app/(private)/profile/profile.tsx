@@ -1,9 +1,5 @@
 "use client";
 
-import Loading from "@/components/shared/loading";
-// import EditProfileDialog from "@/components/profile/update-user-data";
-// import UpdateProfilePicture from "@/components/profile/update_profile-picture";
-// import Loading from "@/components/shared/loading";
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Key, UserRoundPen } from "lucide-react";
+import { Key, Loader2Icon, UserRoundPen } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -59,7 +55,15 @@ const ProfileCard = ({ session }: any) => {
   }, [update, session]);
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="flex items-center">
+          <Loader2Icon className="animate-spin" />
+          <span className="ml-2">Loading...</span>
+        </div>
+      </div>
+
+    );
   }
 
   return (

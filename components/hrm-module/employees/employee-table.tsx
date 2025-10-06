@@ -1,6 +1,5 @@
 "use client";
 
-import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -29,32 +28,59 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateDepartment } from "@/components/hrm-module/department/create/page";
-import DeactivateDepartment from "@/components/hrm-module/department/deactivate/page";
-import ActivateDepartment from "@/components/hrm-module/department/active/page";
-import UpdateDepartmentDialog from "@/components/hrm-module/department/update/page";
+import { Employees } from "@/interfaces/employees.interface";
+import ActivateEmployee from "@/components/hrm-module/employees/active-employee";
+import DeactivateEmployee from "@/components/hrm-module/employees/deactive-employee";
+import { Depot } from "@/interfaces/depot.interface";
+import CreateEmployee from "@/components/hrm-module/employees/create-employee";
 
-interface DepartmentTableProps {
+
+interface EmployeesTableProps {
     session: any;
 }
 
-const DepartmentTable = (session: DepartmentTableProps) => {
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
+const EmployeesTable = (session: EmployeesTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Department[]>([]);
+    const [data, setData] = useState<Employees[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [deptCount, setDeptCount] = useState<any[]>([]);
+    const [moduleData, setModuleData] = useState<any[]>([]);
+    const [departmentData, setDepartmentData] = useState<any[]>([]);
+    const [designationData, setDesignationData] = useState<any[]>([]);
+    const [depotData, setDepotData] = useState<Depot[]>([]);
+    const [idCount, setIdCount] = useState<any[]>([]);
+    const [postingData, setPostingData] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -66,7 +92,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Department>[] = [
+    const columns: ColumnDef<Employees>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -90,80 +116,154 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             enableSorting: true,
             enableHiding: false,
         },
+
         {
-            accessorKey: "department_id",
-            header: "Department ID",
+            accessorKey: "employee_id",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Designation ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\D/g, ""), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("department_id")}</div>
+                <div className="whitespace-nowrap ">
+                    {row.getValue("employee_id")}
+                </div>
+            ),
+        },
+
+        {
+            accessorKey: "full_name",
+            header: "Full Name",
+            cell: ({ row }) => {
+                const fullName = row.getValue("full_name") as string;
+                return <div className="whitespace-nowrap text-start">{highlightText(fullName, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "username",
+            header: "Username",
+            cell: ({ row }) => {
+                const username = row.getValue("username") as string;
+                return <div className="whitespace-nowrap text-start">{highlightText(username, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "email",
+            header: "Email",
+            cell: ({ row }) => {
+                const email = row.getValue("email") as string;
+                return <div className="whitespace-nowrap text-start">{highlightText(email, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "contact",
+            header: "Contact",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("contact")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "present_address",
+            header: "Present Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("present_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_address",
+            header: "Permanent Address",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("permanent_address")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "joining_date",
+            header: "Joining Date",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.original.joining_date
+                    ? format(new Date(row.original.joining_date), 'yyyy-MM-dd')
+                    : 'N/A'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "place_name",
+            header: "Posting Place",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("place_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "permanent_date",
+            header: "Permanent Date",
+            cell: ({ row }) => (
+                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-yellow-200 dark:text-yellow-700  font-bold border rounded-sm p-1"}>{row.original.permanent_date
+                    ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
+                    : 'Temporary Employee'}</div>
+            ),
+        },
+
+        {
+            accessorKey: "designation_name",
+            header: "Designation Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-start">{row.getValue("designation_name")}</div>
             ),
         },
 
         {
             accessorKey: "department_name",
             header: "Department Name",
-            cell: ({ row }) => {
-                const filterValue = (table.getColumn('department_name')?.getFilterValue() as string) || "";
-                const departmentName = row.getValue("department_name") as string;
-
-                if (filterValue && departmentName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = departmentName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap">{departmentName}</div>;
-            },
-        },
-
-        {
-            accessorKey: "department_code",
-            header: "Department Code",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("department_code")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("department_name")}</div>
             ),
         },
 
         {
-            accessorKey: "comment",
-            header: "Comment",
+            accessorKey: "depot_name",
+            header: "Deport Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("depot_name")}</div>
             ),
-        },
-        {
-            accessorKey: "created_by",
-            header: "Created By",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
-            ),
-        },
-        {
-            accessorKey: "modified_by",
-            header: "Modified By",
-            cell: ({ row }) => {
-                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
-            },
         },
 
         {
-            accessorKey: "department_status",
+            accessorKey: "module_name",
+            header: "Module Name",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap text-start">{row.getValue("module_name")}</div>
+            ),
+        },
+
+        {
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("department_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -200,7 +300,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.department_status === 1;
+                const isActive = row.original.active_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -216,11 +316,11 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateDepartment
+                                    <DeactivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            departmentTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -231,11 +331,11 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateDepartment
+                                    <ActivateEmployee
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            departmentTableData({
+                                            employeeTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -247,11 +347,29 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateDepartmentDialog
+                                Make Author
+                                {/* <ActivateEmployee
+                                    id={row.original.id}
+                                    accessToken={accessToken}
+                                    onActiveSuccess={() => {
+                                        employeeTableData({
+                                            itemsPerPage: pagination.pageSize,
+                                            currentPageNumber: pagination.pageIndex,
+                                            sortOrder: "asc",
+                                            filterBy: "",
+                                        });
+                                    }}
+                                /> */}
+                            </div>
+
+                            {/* <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
+                                <UpdateZoneDialog
                                     rowData={row.original}
+                                    depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        departmentTableData({
+                                        getCountInformation();
+                                        zoneTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -259,13 +377,12 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                         });
                                     }}
                                 />
-                            </div>
+                            </div> */}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
             },
         }
-
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
@@ -277,9 +394,9 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         }))
     }, [pagination])
 
-    const getCountInformation = async () => {
+    const getModuleInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-department-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-module`,
             {
                 method: 'GET',
                 headers: {
@@ -290,16 +407,122 @@ const DepartmentTable = (session: DepartmentTableProps) => {
         );
 
         const responseData = await response.json();
+        // console.warn('🚀 ~ getModuleInformation ~ responseData:', responseData);
         if (responseData.status === 'success') {
-            setDeptCount(() => responseData?.data)
+            setModuleData(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const departmentTableData = async (paginationData: any) => {
+    const getDesignationInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/department/get-department-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-designation`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDesignationInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDesignationData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getPostingInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-posting`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getPostingInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setPostingData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getDepartmentInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-department`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepartmentInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepartmentData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getDepotInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setDepotData(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const getCountInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-employee-id-count`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData);
+        if (responseData.status === 'success') {
+            setIdCount(() => responseData?.data)
+        } else {
+            console.error(responseData.message);
+        }
+    };
+
+    const employeeTableData = async (paginationData: any) => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/employees/get-employees-data`,
             {
                 method: 'POST',
                 headers: {
@@ -312,17 +535,16 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             },
         );
 
-
         if (response.ok) {
             const responseData = await response.json();
-            const departmentData = responseData?.data?.data as Department[];
+            const employeeData = responseData?.data?.data as Employees[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => departmentData)
+            setData(() => employeeData)
             setIsLoading(false)
         }
         else {
@@ -339,8 +561,13 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
+        getModuleInformation();
+        getDepartmentInformation();
+        getDesignationInformation();
+        getDepotInformation();
         getCountInformation();
-        departmentTableData({
+        getPostingInformation();
+        employeeTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -364,24 +591,23 @@ const DepartmentTable = (session: DepartmentTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Department Name..."
-                        value={(
-                            table.getColumn('department_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('department_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Full name or Email..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
+                    {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" size="default" className="flex items-center gap-2">
@@ -412,12 +638,17 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateDepartment
+                    <CreateEmployee
                         session={session}
-                        deptCount={deptCount}
+                        moduleData={moduleData}
+                        depotData={depotData}
+                        departmentData={departmentData}
+                        designationData={designationData}
+                        postingData={postingData}
+                        idCount={idCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            departmentTableData({
+                            employeeTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
                                 sortOrder: "asc",
@@ -430,12 +661,12 @@ const DepartmentTable = (session: DepartmentTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b ">
+                            <TableRow key={headerGroup.id} className="">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
-                                        className="text-center font-bold"
+                                        className="text-center font-bold border bg-accent"
                                         key={header.id}
                                     >
                                         {header.isPlaceholder
@@ -459,16 +690,16 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('department_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getState().globalFilter ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No data matched
                                 </TableCell>
                             </TableRow>
                         ) : data.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow className="text-center" key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -477,7 +708,7 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -485,8 +716,6 @@ const DepartmentTable = (session: DepartmentTableProps) => {
                         )}
                     </TableBody>
                 </Table>
-
-
             </div>
             <div className="flex items-center justify-between py-2 border rounded-b-md px-2">
                 <div className="flex-1 hidden sm:block text-sm text-muted-foreground">
@@ -558,4 +787,4 @@ const DepartmentTable = (session: DepartmentTableProps) => {
     )
 }
 
-export default DepartmentTable;
+export default EmployeesTable;

@@ -1,31 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { CodepenIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import Link from "next/";
+import { HousePlus } from "lucide-react";
 import React from "react";
 import { ModeToggle } from "../shared/mode-toggle";
-
-
-const navLinks: { name: string; href: string }[] = [
-	{ name: "Home", href: "/" },
-	{ name: "About", href: "/about" },
-	{ name: "Contact Us", href: "/contact" },
-	{ name: "Join Us", href: "/register" },
-];
+import { NavUser } from "./nav-user";
 
 const Header = ({ session }: { session: any }) => {
-	const currentPath = usePathname();
-
 	return (
-		<header className="h-14 border-b bg-background px-4 md:px-8 z-50">
+		<header
+			className="h-14 border-b px-4 md:px-5 z-50 
+             bg-gradient-to-r from-sky-300 to-sky-800 
+             dark:from-sky-900 dark:to-sky-600"
+		>
 			<div className="flex h-full items-center justify-between">
 				{/* Desktop Navigation */}
 				<nav className="hidden md:flex items-center gap-x-4">
 					<div className="flex flex-row items-center gap-x-4">
-						<CodepenIcon className="h-8 w-8" />
+						<HousePlus className="h-8 w-8" />
 						<span className="text-lg font-semibold">ERP System</span>
 					</div>
 				</nav>
@@ -33,13 +25,17 @@ const Header = ({ session }: { session: any }) => {
 				{/* Mobile Navigation */}
 				<div className="flex md:hidden items-center">
 					<div className="flex items-center gap-x-2">
-						<CodepenIcon className="h-6 w-6" />
+						<HousePlus className="h-6 w-6" />
 						<span className="text-lg font-semibold">ERP System</span>
 					</div>
 				</div>
-				<ModeToggle />
+				<div className="flex">
+					<ModeToggle />
+					<NavUser session={session?.user} />
+				</div>
 			</div>
 		</header>
+
 	);
 };
 

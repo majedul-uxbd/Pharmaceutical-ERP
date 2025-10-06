@@ -25,40 +25,56 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Region } from "@/interfaces/region.interface";
-import { CreateRegion } from "@/components/hrm-module/region/create/page";
-import DeactivateRegion from "@/components/hrm-module/region/deactivate/page";
-import ActivateRegion from "@/components/hrm-module/region/active/page";
-import UpdateRegionDialog from "@/components/hrm-module/region/update/page";
 import { Zone } from "@/interfaces/zone.interface";
+import { CreateZone } from "@/components/hrm-module/zone/create-zone";
+import DeactivateZone from "@/components/hrm-module/zone/deactive-zone";
+import ActivateZone from "@/components/hrm-module/zone/active-zone";
+import UpdateZoneDialog from "@/components/hrm-module/zone/update-zone";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface RegionTableProps {
+interface ZoneTableProps {
     session: any;
 }
 
-const RegionTable = (session: RegionTableProps) => {
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
 
+const ZoneTable = (session: ZoneTableProps) => {
     const accessToken = session?.session.id;
-    const [data, setData] = useState<Region[]>([]);
+    const [data, setData] = useState<Zone[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
-    })
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [zoneData, setZoneData] = useState<Zone[]>([]);
-    const [regionCount, setRegionCount] = useState<any[]>([]);
-    // 🔹 Load saved visibility from localStorage (if exists)
+    const [depotData, setDepotData] = useState<Zone[]>([]);
+    const [zoneCount, setZoneCount] = useState<any[]>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
             if (typeof window !== "undefined") {
@@ -69,7 +85,7 @@ const RegionTable = (session: RegionTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Region>[] = [
+    const columns: ColumnDef<Zone>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -95,26 +111,33 @@ const RegionTable = (session: RegionTableProps) => {
         },
 
         {
-            accessorKey: "region_id",
-            header: "Region ID",
+            accessorKey: "zone_id",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Zone ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_id")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "region_name",
-            header: "Region Name",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_name")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "region_code",
-            header: "Region Code",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("region_code")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("zone_id")}
+                </div>
             ),
         },
 
@@ -122,38 +145,71 @@ const RegionTable = (session: RegionTableProps) => {
             accessorKey: "zone_name",
             header: "Zone Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('zone_name')?.getFilterValue() as string) || "";
                 const zoneName = row.getValue("zone_name") as string;
-
-                if (filterValue && zoneName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = zoneName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap text-slate-700">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap text-slate-700">{zoneName}</div>;
+                return <div className="whitespace-nowrap">{highlightText(zoneName, globalFilter)}</div>;
             },
         },
 
         {
-            accessorKey: "region_status",
+            accessorKey: "zone_code",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Zone Code
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\Z/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\Z/g, ""), 10);
+                return numA - numB;
+            },
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">
+                    {row.getValue("zone_code")}
+                </div>
+            ),
+        },
+
+        {
+            accessorKey: "depot_name",
+            header: "Depot Name",
+            cell: ({ row }) => {
+                const deportName = row.getValue("depot_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(deportName, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "created_by",
+            header: "Created By",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">{row.getValue("created_by")}</div>
+            ),
+        },
+        {
+            accessorKey: "modified_by",
+            header: "Modified By",
+            cell: ({ row }) => {
+                return <div className="whitespace-nowrap">{row.getValue("modified_by") || "Not Modified"}</div>;
+            },
+        },
+
+        {
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("region_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -168,7 +224,7 @@ const RegionTable = (session: RegionTableProps) => {
             accessorKey: "comment",
             header: "Comment",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-slate-700">{row.getValue("comment")}</div>
+                <div className="whitespace-nowrap ">{row.getValue("comment")}</div>
             ),
         },
 
@@ -197,7 +253,7 @@ const RegionTable = (session: RegionTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.region_status === 1;
+                const isActive = row.original.active_status === 1;
 
                 return (
                     <DropdownMenu>
@@ -213,11 +269,11 @@ const RegionTable = (session: RegionTableProps) => {
 
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateRegion
+                                    <DeactivateZone
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            regionTableData({
+                                            zoneTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -228,11 +284,11 @@ const RegionTable = (session: RegionTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateRegion
+                                    <ActivateZone
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            regionTableData({
+                                            zoneTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -244,12 +300,13 @@ const RegionTable = (session: RegionTableProps) => {
                             )}
 
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateRegionDialog
+                                <UpdateZoneDialog
                                     rowData={row.original}
-                                    zoneData={zoneData}
+                                    depotData={depotData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        regionTableData({
+                                        getCountInformation();
+                                        zoneTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -275,9 +332,9 @@ const RegionTable = (session: RegionTableProps) => {
         }))
     }, [pagination])
 
-    const getZoneInformation = async () => {
+    const getDepotInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/common/get-zone`,
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-depot`,
             {
                 method: 'GET',
                 headers: {
@@ -291,7 +348,7 @@ const RegionTable = (session: RegionTableProps) => {
         // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
 
         if (responseData.status === 'success') {
-            setZoneData(() => responseData?.data)
+            setDepotData(() => responseData?.data)
             setIsLoading(false);
 
         } else {
@@ -303,7 +360,7 @@ const RegionTable = (session: RegionTableProps) => {
 
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-region-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-zone-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -315,16 +372,18 @@ const RegionTable = (session: RegionTableProps) => {
 
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
+
         if (responseData.status === 'success') {
-            setRegionCount(() => responseData?.data)
+            setZoneCount(() => responseData?.data)
+
         } else {
             console.error(responseData.message);
         }
     };
 
-    const regionTableData = async (paginationData: any) => {
+    const zoneTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/region/get-region-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/zone/get-zone-data`,
             {
                 method: 'POST',
                 headers: {
@@ -337,16 +396,17 @@ const RegionTable = (session: RegionTableProps) => {
             },
         );
 
+
         if (response.ok) {
             const responseData = await response.json();
-            const regionData = responseData?.data?.data as Region[];
+            const zoneData = responseData?.data?.data as Zone[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => regionData)
+            setData(() => zoneData)
             setIsLoading(false)
         }
         else {
@@ -362,9 +422,9 @@ const RegionTable = (session: RegionTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
-        getZoneInformation();
+        getDepotInformation();
         getCountInformation();
-        regionTableData({
+        zoneTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
             sortOrder: "asc",
@@ -388,24 +448,22 @@ const RegionTable = (session: RegionTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-full md:w-3/5"
-                        placeholder="Filter by Zone Name..."
-                        value={(
-                            table.getColumn('zone_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('zone_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Zone name or Code or Deport Name..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
@@ -437,16 +495,16 @@ const RegionTable = (session: RegionTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateRegion
+                    <CreateZone
                         session={session}
-                        zoneData={zoneData}
-                        regionCount={regionCount}
+                        depotData={depotData}
+                        zoneCount={zoneCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            regionTableData({
+                            zoneTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "desc",
+                                sortOrder: "asc",
                                 filterBy: "",
                             });
                         }}
@@ -456,9 +514,9 @@ const RegionTable = (session: RegionTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-[#f2f4f6]">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-slate-200">
+                            <TableRow key={headerGroup.id} className="border-b ">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         className="text-center font-bold"
@@ -485,7 +543,7 @@ const RegionTable = (session: RegionTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('zone_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getColumn('depot_name')?.getFilterValue() ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
@@ -496,14 +554,14 @@ const RegionTable = (session: RegionTableProps) => {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="p-3 border-r rounded border-slate-200">
+                                        <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -584,4 +642,4 @@ const RegionTable = (session: RegionTableProps) => {
     )
 }
 
-export default RegionTable;
+export default ZoneTable;

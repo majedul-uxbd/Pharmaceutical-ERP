@@ -11,21 +11,21 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreateSchema } from "@/schema/zone.schema";
+import { CreateSchema } from "@/schema/region.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SquarePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
-interface CreateZoneProps {
+interface CreateRegionProps {
     session: any;
-    depotData: any;
-    zoneCount: any;
+    zoneData: any;
+    regionCount: any;
     onCreateSuccess(): void;
 }
-export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: CreateZoneProps) {
+export function CreateRegion({ session, zoneData, regionCount, onCreateSuccess }: CreateRegionProps) {
 
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,10 +34,10 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
         defaultValues: {
-            depot_name: "",
-            zone_id: zoneCount.zone_id,
-            zone_code: zoneCount.zone_code,
             zone_name: "",
+            region_id: regionCount.region_id,
+            region_code: regionCount.region_code,
+            region_name: "",
             comment: ""
         },
     });
@@ -47,7 +47,7 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
 
         setButtonDisable(true);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/zone/add-zone`,
+            `${process.env.NEXT_PUBLIC_API_URL}/region/add-region`,
             {
                 method: 'POST',
                 headers: {
@@ -70,24 +70,36 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
         setButtonDisable(false);
     };
 
+    useEffect(() => {
+        if (regionCount.region_id && regionCount.region_code) {
+            form.reset({
+                zone_name: "",
+                region_id: regionCount.region_id,
+                region_code: regionCount.region_code,
+                region_name: "",
+                comment: ""
+            });
+        }
+    }, [regionCount, form]);
+
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-400 dark:hover:bg-blue-500">
                     <SquarePlus className="font-bold" size={20} />
-                    <span className="hidden sm:inline">Add Zone</span>
+                    <span className="">Add Region</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                {depotData.length > 0 ? (
+                {zoneData.length > 0 ? (
                     <>
                         {/* Header Section */}
                         <DialogHeader className="text-center">
                             <DialogTitle className="text-2xl font-semibold text-gray-800">
-                                Create Zone
+                                Create Region
                             </DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Fill in the details below to create a new depot.
+                                Fill in the details below to create a new region.
                             </DialogDescription>
                         </DialogHeader>
                         <Form {...form}>
@@ -96,23 +108,23 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    {/* Depot Name */}
+                                    {/* Zone Name */}
                                     <FormField
                                         control={form.control}
-                                        name="depot_name"
+                                        name="zone_name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Depot Name</FormLabel>
+                                                <FormLabel>Zone Name</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select a depot" />
+                                                            <SelectValue placeholder="Select a Zone" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {depotData.map((depot: any) => (
-                                                            <SelectItem key={depot.id} value={depot.depot_id}>
-                                                                {depot.depot_name}
+                                                        {zoneData.map((zone: any) => (
+                                                            <SelectItem key={zone.id} value={zone.zone_id}>
+                                                                {zone.zone_name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -122,65 +134,45 @@ export function CreateZone({ session, depotData, zoneCount, onCreateSuccess }: C
                                         )}
                                     />
 
-                                    {/* Zone ID */}
+                                    {/* Region ID */}
                                     <FormField
                                         control={form.control}
-                                        name="zone_id"
+                                        name="region_id"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Zone ID</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone ID" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_id}>
-                                                            {zoneCount.zone_id}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Zone Code */}
-                                    <FormField
-                                        control={form.control}
-                                        name="zone_code"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Zone Code</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Zone Code" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value={zoneCount.zone_code}>
-                                                            {zoneCount.zone_code}
-                                                        </SelectItem>
-                                                        {/* Add more options dynamically if needed */}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* Zone Name */}
-                                    <FormField
-                                        control={form.control}
-                                        name="zone_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Zone Name</FormLabel>
+                                                <FormLabel>Region ID</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} placeholder="Enter Zone Name" />
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Region Code */}
+                                    <FormField
+                                        control={form.control}
+                                        name="region_code"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Region Code</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} readOnly />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Region Name */}
+                                    <FormField
+                                        control={form.control}
+                                        name="region_name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Region Name</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="Enter Region Name" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

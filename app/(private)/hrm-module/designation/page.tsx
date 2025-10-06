@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import DesignationTable from "./designation-table/page";
+import DesignationTable from "../../../../components/hrm-module/designation/designation-table";
 
 const DesignationPage = async () => {
     const session = await auth();

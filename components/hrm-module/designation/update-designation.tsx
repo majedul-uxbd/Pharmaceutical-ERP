@@ -125,10 +125,7 @@ const UpdateDesignationDialog = ({ rowData, accessToken, onUpdateSuccess }: Upda
                                             Designation ID
                                         </FormLabel>
                                         <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter Designation ID"
-                                            />
+                                            <Input {...field} readOnly />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

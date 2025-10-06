@@ -125,10 +125,7 @@ const UpdateDepartmentDialog = ({ rowData, accessToken, onUpdateSuccess }: Updat
                                             Department ID
                                         </FormLabel>
                                         <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Enter Department ID"
-                                            />
+                                            <Input {...field} readOnly />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

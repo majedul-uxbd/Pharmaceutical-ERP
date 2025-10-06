@@ -1,6 +1,5 @@
 "use client";
 
-import { Department } from "@/interfaces/department.interface";
 import { useCallback, useEffect, useState } from "react";
 import {
     ColumnDef,
@@ -18,40 +17,55 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-
     DropdownMenuLabel,
-
     DropdownMenuSeparator,
-
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, MoreHorizontalIcon, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Designation } from "@/interfaces/designation.interface";
-import { CreateDesignation } from "@/components/hrm-module/designation/create/page";
-import ActivateDesignation from "@/components/hrm-module/designation/active/page";
-import DeactivateDesignation from "@/components/hrm-module/designation/deactivate/page";
-import UpdateDesignationDialog from "@/components/hrm-module/designation/update/page";
+import { Region } from "@/interfaces/region.interface";
+import { CreateRegion } from "@/components/hrm-module/region/create-region";
+import DeactivateRegion from "@/components/hrm-module/region/deactive-region";
+import ActivateRegion from "@/components/hrm-module/region/active.region";
+import UpdateRegionDialog from "@/components/hrm-module/region/update-region";
+import { Zone } from "@/interfaces/zone.interface";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-
-
-interface DesignationTableProps {
+interface RegionTableProps {
     session: any;
 }
 
-const DesignationTable = (session: DesignationTableProps) => {
-    const accessToken = session?.session?.id;
+const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return (
+        <>
+            {parts.map((part, index) =>
+                regex.test(part) ? (
+                    <span key={index} className="bg-yellow-300 text-black rounded px-0.5">
+                        {part}
+                    </span>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
 
-    const [data, setData] = useState<Designation[]>([]);
+const RegionTable = (session: RegionTableProps) => {
+
+    const accessToken = session?.session.id;
+    const [data, setData] = useState<Region[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [totalPage, setTotalPage] = useState<number>();
     const [sorting, setSorting] = useState<SortingState>([])
@@ -59,9 +73,11 @@ const DesignationTable = (session: DesignationTableProps) => {
         pageIndex: 0,
         pageSize: 10,
     })
+    const [globalFilter, setGlobalFilter] = useState("");
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState({})
-    const [designationCount, setDesignationCount] = useState<any[]>([]);
+    const [zoneData, setZoneData] = useState<Zone[]>([]);
+    const [regionCount, setRegionCount] = useState<any[]>([]);
     // 🔹 Load saved visibility from localStorage (if exists)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
         () => {
@@ -73,7 +89,7 @@ const DesignationTable = (session: DesignationTableProps) => {
         }
     );
 
-    const columns: ColumnDef<Designation>[] = [
+    const columns: ColumnDef<Region>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -99,66 +115,83 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
-            accessorKey: "designation_id",
-            header: "Designation ID",
+            accessorKey: "region_id",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Region ID
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("designation_id")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("region_id")}
+                </div>
             ),
         },
 
         {
-            accessorKey: "designation_name",
-            header: "Designation Name",
+            accessorKey: "region_name",
+            header: "Region Name",
             cell: ({ row }) => {
-                const filterValue = (table.getColumn('designation_name')?.getFilterValue() as string) || "";
-                const designationName = row.getValue("designation_name") as string;
-
-                if (filterValue && designationName.toLowerCase().includes(filterValue.toLowerCase())) {
-                    // Highlight matching text using regex
-                    const parts = designationName.split(new RegExp(`(${filterValue})`, "gi"));
-
-                    return (
-                        <div className="whitespace-nowrap">
-                            {parts.map((part, index) => (
-                                <span
-                                    key={index}
-                                    className={
-                                        part.toLowerCase() === filterValue.toLowerCase() ? "bg-yellow-300 px-1 rounded" : ""
-                                    }
-                                >
-                                    {part}
-                                </span>
-                            ))}
-                        </div>
-                    );
-                }
-
-                return <div className="whitespace-nowrap">{designationName}</div>;
+                const regionName = row.getValue("region_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(regionName, globalFilter)}</div>;
             },
         },
 
         {
-            accessorKey: "designation_code",
-            header: "Designation Code",
+            accessorKey: "region_code",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Region Code
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\R/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\R/g, ""), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("designation_code")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("region_code")}
+                </div>
             ),
         },
 
         {
-            accessorKey: "description",
-            header: "Description",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("description")}</div>
-            ),
-        },
-
-        {
-            accessorKey: "comment",
-            header: "Comment",
-            cell: ({ row }) => (
-                <div className="whitespace-nowrap">{row.getValue("comment")}</div>
-            ),
+            accessorKey: "zone_name",
+            header: "Zone Name",
+            cell: ({ row }) => {
+                const zoneName = row.getValue("zone_name") as string;
+                return <div className="whitespace-nowrap">{highlightText(zoneName, globalFilter)}</div>;
+            },
         },
 
         {
@@ -177,10 +210,10 @@ const DesignationTable = (session: DesignationTableProps) => {
         },
 
         {
-            accessorKey: "designation_status",
+            accessorKey: "active_status",
             header: "Status",
             cell: ({ row }) => {
-                const isActive = row.getValue("designation_status") === 1;
+                const isActive = row.getValue("active_status") === 1;
                 return (
                     <Badge
                         variant={isActive ? "default" : "destructive"}
@@ -190,6 +223,13 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </Badge>
                 );
             },
+        },
+        {
+            accessorKey: "comment",
+            header: "Comment",
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap ">{row.getValue("comment")}</div>
+            ),
         },
 
         {
@@ -217,7 +257,8 @@ const DesignationTable = (session: DesignationTableProps) => {
             header: 'Actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const isActive = row.original.designation_status === 1;
+                const isActive = row.original.active_status === 1;
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -229,13 +270,14 @@ const DesignationTable = (session: DesignationTableProps) => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel className='text-center'>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
+
                             {isActive ? (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <DeactivateDesignation
+                                    <DeactivateRegion
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onInactiveSuccess={() => {
-                                            designationTableData({
+                                            regionTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -246,11 +288,11 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 </div>
                             ) : (
                                 <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                    <ActivateDesignation
+                                    <ActivateRegion
                                         id={row.original.id}
                                         accessToken={accessToken}
                                         onActiveSuccess={() => {
-                                            designationTableData({
+                                            regionTableData({
                                                 itemsPerPage: pagination.pageSize,
                                                 currentPageNumber: pagination.pageIndex,
                                                 sortOrder: "asc",
@@ -260,12 +302,14 @@ const DesignationTable = (session: DesignationTableProps) => {
                                     />
                                 </div>
                             )}
+
                             <div className='flex w-full flex-row justify-start items-center hover:rounded-md'>
-                                <UpdateDesignationDialog
+                                <UpdateRegionDialog
                                     rowData={row.original}
+                                    zoneData={zoneData}
                                     accessToken={accessToken}
                                     onUpdateSuccess={() => {
-                                        designationTableData({
+                                        regionTableData({
                                             itemsPerPage: pagination.pageSize,
                                             currentPageNumber: pagination.pageIndex,
                                             sortOrder: "asc",
@@ -278,7 +322,8 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </DropdownMenu>
                 );
             },
-        },
+        }
+
     ]
 
     const handlePaginationState = useCallback(async (btnType: "prev" | "next" | "last" | "first" = "next") => {
@@ -290,9 +335,35 @@ const DesignationTable = (session: DesignationTableProps) => {
         }))
     }, [pagination])
 
+    const getZoneInformation = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/get-zone`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const responseData = await response.json();
+        // console.warn('🚀 ~ getDepotInformation ~ responseData:', responseData.data);
+
+        if (responseData.status === 'success') {
+            setZoneData(() => responseData?.data)
+            setIsLoading(false);
+
+        } else {
+            setIsLoading(true);
+            console.error(responseData.message);
+        }
+        // setButtonDisable(false);
+    };
+
     const getCountInformation = async () => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-designation-id-count`,
+            `${process.env.NEXT_PUBLIC_API_URL}/id-count/get-region-id-count`,
             {
                 method: 'GET',
                 headers: {
@@ -305,15 +376,15 @@ const DesignationTable = (session: DesignationTableProps) => {
         const responseData = await response.json();
         // console.warn('🚀 ~ getCountInformation ~ responseData:', responseData.data);
         if (responseData.status === 'success') {
-            setDesignationCount(() => responseData?.data)
+            setRegionCount(() => responseData?.data)
         } else {
             console.error(responseData.message);
         }
     };
 
-    const designationTableData = async (paginationData: any) => {
+    const regionTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/designation/get-designation-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/region/get-region-data`,
             {
                 method: 'POST',
                 headers: {
@@ -328,14 +399,14 @@ const DesignationTable = (session: DesignationTableProps) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            const designationData = responseData?.data?.data as Designation[];
+            const regionData = responseData?.data?.data as Region[];
             const pageCount = Math.ceil(responseData?.data?.metadata?.totalRows / pagination.pageSize);
             if (pageCount === 0) {
                 setTotalPage(() => 1);
             } else {
                 setTotalPage(() => pageCount);
             }
-            setData(() => designationData)
+            setData(() => regionData)
             setIsLoading(false)
         }
         else {
@@ -351,11 +422,12 @@ const DesignationTable = (session: DesignationTableProps) => {
     }, [columnVisibility]);
 
     useEffect(() => {
+        getZoneInformation();
         getCountInformation();
-        designationTableData({
+        regionTableData({
             itemsPerPage: pagination.pageSize,
             currentPageNumber: pagination.pageIndex,
-            sortOrder: "desc",
+            sortOrder: "asc",
             filterBy: ""
         })
     }, [pagination]);
@@ -376,24 +448,22 @@ const DesignationTable = (session: DesignationTableProps) => {
             columnFilters,
             columnVisibility,
             rowSelection,
+            globalFilter, // use the state variable here
         },
+        onGlobalFilterChange: setGlobalFilter, // <-- important
     })
     return (
         <div className="w-full">
             <div className="flex justify-start flex-col gap-2 md:flex-row md:justify-between items-start md:items-center mb-2">
                 <div className="w-full">
                     <Input
-                        className="w-2/5"
-                        placeholder="Filter by Designation Name..."
-                        value={(
-                            table.getColumn('designation_name')?.getFilterValue() as string
-                        ) ?? ''}
-                        onChange={(event) =>
-                            table.getColumn('designation_name')?.setFilterValue(event.target.value)
-                        }
+                        className="w-full"
+                        placeholder="Search by Region name or Zone name..."
+                        value={globalFilter}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="w-full flex justify-between md:justify-end  gap-2">
                     {/* Column Toggle Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
@@ -425,15 +495,16 @@ const DesignationTable = (session: DesignationTableProps) => {
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
-                    <CreateDesignation
+                    <CreateRegion
                         session={session}
-                        designationCount={designationCount}
+                        zoneData={zoneData}
+                        regionCount={regionCount}
                         onCreateSuccess={() => {
                             getCountInformation();
-                            designationTableData({
+                            regionTableData({
                                 itemsPerPage: pagination.pageSize,
                                 currentPageNumber: pagination.pageIndex,
-                                sortOrder: "asc",
+                                sortOrder: "desc",
                                 filterBy: "",
                             });
                         }}
@@ -443,12 +514,12 @@ const DesignationTable = (session: DesignationTableProps) => {
 
             <div className="max-h-[calc(100vh-250px)] overflow-y-auto rounded-t-md border border-solid">
                 <Table className="relative h-[80%]">
-                    <TableHeader className="sticky top-0 whitespace-nowrap z-10 bg-accent">
+                    <TableHeader className="sticky top-0 whitespace-nowrap z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b">
+                            <TableRow key={headerGroup.id} className="">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
-                                        className="text-center font-bold"
+                                        className="text-center font-bold border bg-accent"
                                         key={header.id}
                                     >
                                         {header.isPlaceholder
@@ -472,16 +543,16 @@ const DesignationTable = (session: DesignationTableProps) => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : table.getRowModel().rows.length === 0 && table.getColumn('designation_name')?.getFilterValue() ? (
+                        ) : table.getRowModel().rows.length === 0 && table.getState().globalFilter ? (
                             // If no rows match the filter, show the "No data matched" message inside a table row
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No data matched
                                 </TableCell>
                             </TableRow>
                         ) : data.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow className="text-center" key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="p-3 border-r rounded ">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -490,7 +561,7 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="border-slate-200">
+                            <TableRow className="">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No results.
                                 </TableCell>
@@ -498,8 +569,6 @@ const DesignationTable = (session: DesignationTableProps) => {
                         )}
                     </TableBody>
                 </Table>
-
-
             </div>
             <div className="flex items-center justify-between py-2 border rounded-b-md px-2">
                 <div className="flex-1 hidden sm:block text-sm text-muted-foreground">
@@ -533,14 +602,12 @@ const DesignationTable = (session: DesignationTableProps) => {
                     </div>
                     {/* Pagination Controls */}
                     <div className="flex w-full gap-4 md:flex-row md:items-center justify-between md:w-auto">
-
                         {/* Current Page Info and Navigation */}
                         <div className="flex flex-row justify-between text-sm items-center gap-4 md:flex-row md:gap-8">
                             Page {pagination.pageIndex + 1} of{' '}
                             {totalPage}
                         </div>
                         <div className="flex items-center space-x-2">
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-24 p-2"
@@ -553,7 +620,6 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Previous
                             </Button>
-
                             <Button
                                 variant="outline"
                                 className="h-8 w-16 p-2"
@@ -562,7 +628,6 @@ const DesignationTable = (session: DesignationTableProps) => {
                                 }}
                                 disabled={pagination.pageIndex + 1 === totalPage}
                             >
-
                                 <span className="sr-only">Go to next page</span>
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
@@ -575,4 +640,4 @@ const DesignationTable = (session: DesignationTableProps) => {
     )
 }
 
-export default DesignationTable;
+export default RegionTable;
