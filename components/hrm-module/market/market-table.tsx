@@ -158,11 +158,33 @@ const MarketTable = (session: MarketTableProps) => {
 
         {
             accessorKey: "market_code",
-            header: "Market Code",
-            cell: ({ row }) => {
-                const marketCode = row.getValue("market_code") as string;
-                return <div className="whitespace-nowrap">{highlightText(marketCode, globalFilter)}</div>;
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Market Code
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
             },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\M/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\M/g, ""), 10);
+                return numA - numB;
+            },
+            cell: ({ row }) => (
+                <div className="whitespace-nowrap">
+                    {row.getValue("market_code")}
+                </div>
+            ),
         },
 
         {

@@ -142,7 +142,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                 return numA - numB;
             },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">
+                <div className="whitespace-nowrap ">
                     {row.getValue("employee_id")}
                 </div>
             ),
@@ -153,7 +153,16 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             header: "Full Name",
             cell: ({ row }) => {
                 const fullName = row.getValue("full_name") as string;
-                return <div className="whitespace-nowrap">{highlightText(fullName, globalFilter)}</div>;
+                return <div className="whitespace-nowrap text-start">{highlightText(fullName, globalFilter)}</div>;
+            },
+        },
+
+        {
+            accessorKey: "username",
+            header: "Username",
+            cell: ({ row }) => {
+                const username = row.getValue("username") as string;
+                return <div className="whitespace-nowrap text-start">{highlightText(username, globalFilter)}</div>;
             },
         },
 
@@ -162,7 +171,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             header: "Email",
             cell: ({ row }) => {
                 const email = row.getValue("email") as string;
-                return <div className="whitespace-nowrap">{highlightText(email, globalFilter)}</div>;
+                return <div className="whitespace-nowrap text-start">{highlightText(email, globalFilter)}</div>;
             },
         },
 
@@ -222,7 +231,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "designation_name",
             header: "Designation Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.getValue("designation_name")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("designation_name")}</div>
             ),
         },
 
@@ -230,7 +239,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "department_name",
             header: "Department Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.getValue("department_name")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("department_name")}</div>
             ),
         },
 
@@ -238,7 +247,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "depot_name",
             header: "Deport Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.getValue("depot_name")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("depot_name")}</div>
             ),
         },
 
@@ -246,7 +255,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "module_name",
             header: "Module Name",
             cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.getValue("module_name")}</div>
+                <div className="whitespace-nowrap text-start">{row.getValue("module_name")}</div>
             ),
         },
 

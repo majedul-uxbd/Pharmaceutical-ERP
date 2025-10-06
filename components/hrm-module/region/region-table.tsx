@@ -156,9 +156,32 @@ const RegionTable = (session: RegionTableProps) => {
 
         {
             accessorKey: "region_code",
-            header: "Region Code",
+            header: ({ column }) => {
+                const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        Region Code
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0"
+                            onClick={() => column.toggleSorting(isSorted === "asc")}
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB, columnId) => {
+                const numA = parseInt((rowA.getValue(columnId) as string).replace(/\R/g, ""), 10);
+                const numB = parseInt((rowB.getValue(columnId) as string).replace(/\R/g, ""), 10);
+                return numA - numB;
+            },
             cell: ({ row }) => (
-                <div className="whitespace-nowrap ">{row.getValue("region_code")}</div>
+                <div className="whitespace-nowrap">
+                    {row.getValue("region_code")}
+                </div>
             ),
         },
 
