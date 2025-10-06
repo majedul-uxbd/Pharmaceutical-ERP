@@ -15,6 +15,14 @@ export const CreateSchema = z.object({
         .max(100, {
             message: 'Maximum 100 characters allowed',
         }),
+    username: z
+        .string()
+        .min(1, {
+            message: 'Username is required',
+        })
+        .max(60, {
+            message: 'Maximum 60 characters allowed',
+        }),
     email: z
         .string()
         .email({

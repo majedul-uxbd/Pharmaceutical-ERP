@@ -45,12 +45,14 @@ const CreateEmployee = ({
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
+    const [date, setDate] = useState<Date | undefined>(new Date())
 
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
         defaultValues: {
             employee_id: idCount.employee_id,
             full_name: '',
+            username: '',
             email: "",
             contact: '',
             present_address: '',
@@ -113,7 +115,14 @@ const CreateEmployee = ({
             });
         }
     }, [idCount, form]);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
+
+    const clearDates = () => {
+        setStartDate("");
+        setEndDate("");
+    };
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -160,18 +169,32 @@ const CreateEmployee = ({
                                         {/* Full Name Field */}
                                         <FormField
                                             control={form.control}
-                                            name="full_name"
+                                            name="username"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Full Name</FormLabel>
+                                                    <FormLabel>Username</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} placeholder="Enter Full Name" />
+                                                        <Input {...field} placeholder="Enter username" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
+                                    {/* Full Name Field */}
+                                    <FormField
+                                        control={form.control}
+                                        name="full_name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Full Name</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="Enter Full Name" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Email Field */}
                                         <FormField
@@ -248,37 +271,15 @@ const CreateEmployee = ({
                                         <FormField
                                             control={form.control}
                                             name="joining_date"
-                                            render={({ field }) => {
-                                                const [open, setOpen] = useState(false); // control popover open state
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>Joining Date</FormLabel>
-                                                        <Popover open={open} onOpenChange={setOpen}>
-                                                            <PopoverTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
-                                                                >
-                                                                    <CalendarIcon className="mr-2" />
-                                                                    {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="w-auto p-0">
-                                                                <Calendar
-                                                                    mode="single"
-                                                                    selected={field.value ? new Date(field.value) : undefined}
-                                                                    onSelect={(date) => {
-                                                                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                                                                        setOpen(false); // close popover when date is selected
-                                                                    }}
-                                                                    initialFocus
-                                                                />
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                );
-                                            }}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Joining Date</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="date" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
 
                                         {/* Permanent Date Field */}
@@ -290,27 +291,7 @@ const CreateEmployee = ({
                                                 return (
                                                     <FormItem>
                                                         <FormLabel>Permanent Date</FormLabel>
-                                                        <Popover open={open} onOpenChange={setOpen}>
-                                                            <PopoverTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="w-full flex items-center justify-start px-3 py-2 border rounded-md focus:ring-3 focus:ring-blue-300"
-                                                                >
-                                                                    <CalendarIcon className="mr-2" />
-                                                                    {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="w-auto p-0">
-                                                                <Calendar
-                                                                    mode="single"
-                                                                    selected={field.value ? new Date(field.value) : undefined}
-                                                                    onSelect={(date) => {
-                                                                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                                                                        setOpen(false); // close popover when date is selected
-                                                                    }}
-                                                                />
-                                                            </PopoverContent>
-                                                        </Popover>
+                                                        <Input type="date" {...field} />
                                                         <FormMessage />
                                                     </FormItem>
                                                 );

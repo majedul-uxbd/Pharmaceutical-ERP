@@ -123,7 +123,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                 const isSorted = column.getIsSorted(); // 'asc' | 'desc' | false
                 return (
                     <div className="flex items-center justify-center gap-2">
-                        Designation ID
+                        Employee ID
                         <Button
                             variant="ghost"
                             size="icon"
@@ -221,9 +221,9 @@ const EmployeesTable = (session: EmployeesTableProps) => {
             accessorKey: "permanent_date",
             header: "Permanent Date",
             cell: ({ row }) => (
-                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-yellow-200 dark:text-yellow-700  font-bold border rounded-sm p-1"}>{row.original.permanent_date
+                <div className={row.original.permanent_date ? "" : "whitespace-nowrap bg-cyan-300 dark:text-cyan-700  font-bold border rounded-sm p-1"}>{row.original.permanent_date
                     ? format(new Date(row.original.permanent_date), 'yyyy-MM-dd')
-                    : 'Temporary Employee'}</div>
+                    : 'Intern'}</div>
             ),
         },
 
@@ -601,7 +601,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
                 <div className="w-full">
                     <Input
                         className="w-full"
-                        placeholder="Search by Full name or Email..."
+                        placeholder="Search by Full name or Username or Email..."
                         value={globalFilter}
                         onChange={(event) => setGlobalFilter(event.target.value)}
                     />
