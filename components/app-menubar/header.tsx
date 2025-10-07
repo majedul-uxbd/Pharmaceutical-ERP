@@ -10,7 +10,7 @@ const Header = ({ session }: { session: any }) => {
 	return (
 		<header
 			className="h-14 border-b px-4 md:px-5 z-50 
-             bg-gradient-to-r from-sky-300 to-sky-800 
+             bg-linear-to-r from-sky-300 to-sky-800 
              dark:from-sky-900 dark:to-sky-600"
 		>
 			<div className="flex h-full items-center justify-between">
