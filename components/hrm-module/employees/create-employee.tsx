@@ -19,9 +19,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import PhoneInput from "react-phone-number-input";
+import 'react-phone-number-input/style.css'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+
 
 interface CreateEmployeeProps {
     session: any;
@@ -46,6 +49,8 @@ const CreateEmployee = ({
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
     const [date, setDate] = useState<Date | undefined>(new Date())
+    const [month, setMonth] = useState<Date | undefined>(date)
+    const [value, setValue] = useState(formatDate(date))
 
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
@@ -115,14 +120,24 @@ const CreateEmployee = ({
             });
         }
     }, [idCount, form]);
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
 
+    function formatDate(date: Date | undefined) {
+        if (!date) {
+            return ""
+        }
+        return date.toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        })
+    }
+    function isValidDate(date: Date | undefined) {
+        if (!date) {
+            return false
+        }
+        return !isNaN(date.getTime())
+    }
 
-    const clearDates = () => {
-        setStartDate("");
-        setEndDate("");
-    };
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -131,7 +146,7 @@ const CreateEmployee = ({
                     <span className="">Add Employee</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[650px] h-[97vh]">
+            <DialogContent className="sm:max-w-[650px] h-[96vh]">
                 {moduleData.length > 0 &&
                     depotData.length > 0 &&
                     departmentData.length > 0 &&
@@ -225,7 +240,7 @@ const CreateEmployee = ({
                                                             value={field.value}
                                                             onChange={(phone) => field.onChange(phone)}
                                                             defaultCountry="BD"
-                                                            className="w-full p-2 border rounded-md"
+                                                            className="w-full p-2 text-sm border rounded-md"
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -266,39 +281,67 @@ const CreateEmployee = ({
                                         />
                                     </div>
 
-                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Joining Date Field */}
-                                        <FormField
-                                            control={form.control}
-                                            name="joining_date"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Joining Date</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="date" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                    {/* <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"> */}
+                                    {/* Joining Date Field */}
+                                    <FormField
+                                        control={form.control}
+                                        name="joining_date"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Joining Date</FormLabel>
+                                                <FormControl>
+                                                    <Input type="date" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                        {/* Permanent Date Field */}
-                                        <FormField
-                                            control={form.control}
-                                            name="permanent_date"
-                                            render={({ field }) => {
-                                                const [open, setOpen] = useState(false);
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>Permanent Date</FormLabel>
-                                                        <Input type="date" {...field} />
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                );
-                                            }}
-                                        />
+                                    {/* Permanent Date Field */}
+                                    <FormField
+                                        control={form.control}
+                                        name="permanent_date"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel>Permanent Date</FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant="outline"
+                                                                className={cn(
+                                                                    "w-full pl-3 text-left font-normal",
+                                                                    !field.value && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value ? (
+                                                                    format(field.value, "PPP")
+                                                                ) : (
+                                                                    <span>Pick a date</span>
+                                                                )}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-full p-0" align="start">
+                                                        <Calendar
+                                                            className="w-full bg-cyan-500"
+                                                            mode="single"
+                                                            selected={field.value ? new Date(field.value) : undefined}
+                                                            onSelect={(selectedDate) => {
+                                                                field.onChange(selectedDate);
+                                                                setDate(selectedDate);
+                                                            }}
+                                                            initialFocus
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                    </div>
+                                    {/* </div> */}
 
                                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* NID No Field */}
