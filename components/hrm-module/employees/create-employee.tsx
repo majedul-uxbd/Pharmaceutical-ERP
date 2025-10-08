@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreateSchema } from "@/schema/employee.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, Loader2, SquarePlus } from "lucide-react";
+import { CalendarIcon, Eye, EyeOff, Loader2, SquarePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -48,9 +48,7 @@ const CreateEmployee = ({
     const authToken = session?.session.id;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [buttonDisable, setButtonDisable] = useState(false);
-    const [date, setDate] = useState<Date | undefined>(new Date())
-    const [month, setMonth] = useState<Date | undefined>(date)
-    const [value, setValue] = useState(formatDate(date))
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<z.infer<typeof CreateSchema>>({
         resolver: zodResolver(CreateSchema),
@@ -58,7 +56,8 @@ const CreateEmployee = ({
             employee_id: idCount.employee_id,
             full_name: '',
             username: '',
-            email: "",
+            email: '',
+            password: '',
             contact: '',
             present_address: '',
             permanent_address: '',
@@ -105,7 +104,8 @@ const CreateEmployee = ({
             form.reset({
                 employee_id: idCount.employee_id,
                 full_name: '',
-                email: "",
+                email: '',
+                password: '',
                 contact: '',
                 present_address: '',
                 permanent_address: '',
@@ -120,23 +120,6 @@ const CreateEmployee = ({
             });
         }
     }, [idCount, form]);
-
-    function formatDate(date: Date | undefined) {
-        if (!date) {
-            return ""
-        }
-        return date.toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-        })
-    }
-    function isValidDate(date: Date | undefined) {
-        if (!date) {
-            return false
-        }
-        return !isNaN(date.getTime())
-    }
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -181,7 +164,7 @@ const CreateEmployee = ({
                                             )}
                                         />
 
-                                        {/* Full Name Field */}
+                                        {/* Username Field */}
                                         <FormField
                                             control={form.control}
                                             name="username"
@@ -196,30 +179,17 @@ const CreateEmployee = ({
                                             )}
                                         />
                                     </div>
-                                    {/* Full Name Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="full_name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Full Name</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} placeholder="Enter Full Name" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+
                                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Email Field */}
+                                        {/* Full Name Field */}
                                         <FormField
                                             control={form.control}
-                                            name="email"
+                                            name="full_name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Email</FormLabel>
+                                                    <FormLabel>Full Name</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} type="email" placeholder="Enter Email" />
+                                                        <Input {...field} placeholder="Enter Full Name" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -242,6 +212,51 @@ const CreateEmployee = ({
                                                             defaultCountry="BD"
                                                             className="w-full p-2 text-sm border rounded-md"
                                                         />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Email Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="email" placeholder="Enter Email" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        {/* Password Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Password</FormLabel>
+                                                    <FormControl>
+                                                        <div className="relative">
+                                                            <Input
+                                                                {...field}
+                                                                type={showPassword ? "text" : "password"}
+                                                                placeholder="******"
+                                                                className="pr-10"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                                className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-hidden"
+                                                            >
+                                                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                            </button>
+                                                        </div>
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -281,67 +296,95 @@ const CreateEmployee = ({
                                         />
                                     </div>
 
-                                    {/* <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"> */}
-                                    {/* Joining Date Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="joining_date"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Joining Date</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Joining Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="joining_date"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Joining Date</FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "w-full pl-3 text-left font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    {field.value ? (
+                                                                        format(new Date(field.value), "PPP")
+                                                                    ) : (
+                                                                        <span>Pick a date</span>
+                                                                    )}
+                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-full p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={field.value ? new Date(field.value) : undefined}
+                                                                onSelect={(selectedDate) => {
+                                                                    field.onChange(
+                                                                        selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""
+                                                                    );
+                                                                }}
+                                                                initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    {/* Permanent Date Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="permanent_date"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel>Permanent Date</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <FormControl>
-                                                            <Button
-                                                                variant="outline"
-                                                                className={cn(
-                                                                    "w-full pl-3 text-left font-normal",
-                                                                    !field.value && "text-muted-foreground"
-                                                                )}
-                                                            >
-                                                                {field.value ? (
-                                                                    format(field.value, "PPP")
-                                                                ) : (
-                                                                    <span>Pick a date</span>
-                                                                )}
-                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                            </Button>
-                                                        </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-full p-0" align="start">
-                                                        <Calendar
-                                                            className="w-full bg-cyan-500"
-                                                            mode="single"
-                                                            selected={field.value ? new Date(field.value) : undefined}
-                                                            onSelect={(selectedDate) => {
-                                                                field.onChange(selectedDate);
-                                                                setDate(selectedDate);
-                                                            }}
-                                                            initialFocus
-                                                        />
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {/* </div> */}
+                                        {/* Permanent Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="permanent_date"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Permanent Date</FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "w-full pl-3 text-left font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    {field.value ? (
+                                                                        format(new Date(field.value), "PPP")
+                                                                    ) : (
+                                                                        <span>Pick a date</span>
+                                                                    )}
+                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-full p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={field.value ? new Date(field.value) : undefined}
+                                                                onSelect={(selectedDate) => {
+                                                                    field.onChange(
+                                                                        selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""
+                                                                    );
+                                                                }}
+                                                                initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
                                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* NID No Field */}

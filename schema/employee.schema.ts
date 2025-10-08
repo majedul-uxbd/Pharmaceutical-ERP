@@ -103,6 +103,9 @@ export const CreateSchema = z.object({
         .max(10, {
             message: 'Maximum 10 characters allowed',
         }),
+    password: z.string().min(6, {
+        message: "Minimum 6 characters required",
+    }),
 });
 
 export const UpdateSchema = z.object({
