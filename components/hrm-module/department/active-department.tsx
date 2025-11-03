@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CircleCheckBig, Trash2 } from "lucide-react";
+import { CircleCheckBig } from "lucide-react";
 import { toast } from "sonner";
 
 interface DeactivateDepartmentProps {

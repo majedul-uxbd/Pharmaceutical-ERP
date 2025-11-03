@@ -2,6 +2,7 @@
 
 import {
 	BriefcaseBusiness,
+	ChartLine,
 	LayoutDashboard,
 	Map,
 	MapPin,
@@ -290,56 +291,12 @@ const SidebarPage = ({ session }: SidebarPageProps) => {
 									<MenuItem className="dark:bg-black">
 										<Link
 											className={cn(
-												isActiveRoute("/hrm-module/department") && "bg-accent p-2 cursor-pointer",
+												isActiveRoute("/hrm-module/salary-structure") && "bg-accent p-2 cursor-pointer",
 												"flex items-center text-[13px] gap-2"
 											)}
-											href="/hrm-module/department"
+											href="/hrm-module/salary-structure"
 										>
-											<BriefcaseBusiness className="size-4" /> Department
-										</Link>
-									</MenuItem>
-									<MenuItem className="dark:bg-black">
-										<Link
-											className={cn(
-												isActiveRoute("/hrm-module/designation") && "bg-accent p-2 cursor-pointer",
-												"flex items-center text-[13px] gap-2"
-											)}
-											href="/hrm-module/designation"
-										>
-											<Presentation className="size-4" /> Designation
-										</Link>
-									</MenuItem>
-									<MenuItem className="dark:bg-black">
-										<Link
-											className={cn(
-												isActiveRoute("/hrm-module/zone") && "bg-accent p-2 cursor-pointer",
-												"flex items-center text-[13px] gap-2"
-											)}
-											href="/hrm-module/zone"
-										>
-											<MapPin className="size-4" /> Zone
-										</Link>
-									</MenuItem>
-									<MenuItem className="dark:bg-black">
-										<Link
-											className={cn(
-												isActiveRoute("/hrm-module/region") && "bg-accent p-2 cursor-pointer",
-												"flex items-center text-[13px] gap-2"
-											)}
-											href="/hrm-module/region"
-										>
-											<Map className="size-4" /> Region
-										</Link>
-									</MenuItem>
-									<MenuItem className="dark:bg-black">
-										<Link
-											className={cn(
-												isActiveRoute("/hrm-module/market") && "bg-accent p-2 cursor-pointer",
-												"flex items-center text-[13px] gap-2"
-											)}
-											href="/hrm-module/market"
-										>
-											<StoreIcon className="size-4" /> Market
+											<ChartLine className="size-4" /> Salary Structure
 										</Link>
 									</MenuItem>
 								</SubMenu>

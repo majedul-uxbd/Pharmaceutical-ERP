@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form"; // Import React Hook Form
+import { useForm } from "react-hook-form";
 import {
     Dialog,
     DialogContent,
@@ -8,7 +8,7 @@ import {
     DialogFooter,
     DialogDescription,
     DialogTrigger,
-} from "@/components/ui/dialog"; // Replace with your Dialog component
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -21,9 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import "react-phone-number-input/style.css";
-import { PenLine, UserPen } from "lucide-react";
+import { PenLine } from "lucide-react";
 import { toast } from "sonner";
-import { Department, UpdateDepartment } from "@/interfaces/department.interface";
+import { UpdateDepartment } from "@/interfaces/department.interface";
 import { UpdateSchema } from "@/schema/department.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
