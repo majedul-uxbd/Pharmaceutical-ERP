@@ -107,12 +107,12 @@ const UpdateRegionDialog = ({ rowData, zoneData, accessToken, onUpdateSuccess }:
                     <span>Update</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="p-6 rounded-xl shadow-2xl bg-white">
+            <DialogContent className="p-6 rounded-xl shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-semibold text-center text-gray-800">
+                    <DialogTitle className="text-2xl font-semibold text-center">
                         Update Region
                     </DialogTitle>
-                    <DialogDescription className="text-center text-gray-500">
+                    <DialogDescription className="text-center text-muted-foreground">
                         Update Region Information
                     </DialogDescription>
                 </DialogHeader>

@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import SiteFooter from "@/components/app-menubar/footer";
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import ScreenBreakpoint from "@/utilities/ScreenBreakpoint";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default async function RootLayout({
                 <main className="flex-1 w-full mx-4 h-[calc(100%-125px)] my-16 overflow-hidden">
                   {children}
                   <ThemeProvider />
+                  <ScreenBreakpoint />
                   <Toaster position="bottom-center" richColors expand={false} />
                 </main>
               </div>

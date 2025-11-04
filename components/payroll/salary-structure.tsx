@@ -92,7 +92,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                 value={employeeId}
                                 onChange={(e) => setEmployeeId(e.target.value)}
                             />
-                            <Button onClick={fetchEmployeeDetails} disabled={loading1 || !employeeId}>
+                            <Button variant="default" onClick={fetchEmployeeDetails} disabled={loading1 || !employeeId}>
                                 {loading1 ?
                                     <>
                                         <Spinner />
@@ -207,7 +207,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                         value={accountNo}
                                         onChange={(e) => setAccountNo(e.target.value)}
                                     />
-                                    <Button onClick={fetchBankAccountDetails} disabled={loading2 || !accountNo}>
+                                    <Button variant="default" onClick={fetchBankAccountDetails} disabled={loading2 || !accountNo}>
                                         {loading2 ?
                                             <>
                                                 <Spinner />
