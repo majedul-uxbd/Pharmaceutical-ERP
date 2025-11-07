@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "author": "Md. Majedul Islam",
+  "contributors": [
+    "Md. Majedul Islam"
+  ],
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",

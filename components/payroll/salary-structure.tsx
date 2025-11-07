@@ -85,7 +85,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="flex flex-col">
                         <Label htmlFor="employeeId">Employee ID</Label>
-                        <div className="w-[200px] flex gap-2 mt-3">
+                        <div className="min-w-[200px] flex gap-2 mt-3">
                             <Input
                                 id="employeeId"
                                 placeholder="Employee ID"
