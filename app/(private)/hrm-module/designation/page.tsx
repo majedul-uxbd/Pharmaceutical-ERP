@@ -5,7 +5,9 @@ const DesignationPage = async () => {
     const session = await auth();
 
     return (
-        <DesignationTable session={session?.user} />
+        <div>
+            <DesignationTable session={session?.user} />
+        </div>
     )
 }
 

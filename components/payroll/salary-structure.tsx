@@ -10,17 +10,17 @@ import { Spinner } from "../ui/spinner"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { format } from "date-fns"
 import { Calendar } from "../ui/calendar"
-
+import { toast } from "sonner"
 interface SalaryStructureProps {
     session: any
 }
 
-interface EmployeeInfo {
-    name: string
-    postingPlace: string
-    designation: string
-    department: string
-    joiningDate: string
+interface EmployeeList {
+    full_name: string
+    place_name: string
+    designation_name: string
+    department_name: string
+    joining_date: string
 }
 
 interface BankInfo {
@@ -29,34 +29,45 @@ interface BankInfo {
 }
 
 const SalaryStructure = ({ session }: SalaryStructureProps) => {
+    const accessToken = session?.id;
     const [employeeId, setEmployeeId] = useState("")
-    const [employee, setEmployee] = useState<EmployeeInfo | null>(null)
+    const [employee, setEmployee] = useState<EmployeeList | null>(null)
     const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
     const [loading1, setLoading1] = useState(false)
     const [loading2, setLoading2] = useState(false)
     const [salaryEDate, setSalaryEDate] = useState<Date | undefined>(undefined)
     const [pfDate, setPfDate] = useState<Date | undefined>(undefined)
     const [accountNo, setAccountNo] = useState("")
-
+    const formattedJoiningDate = employee?.joining_date
+        ? format(new Date(employee.joining_date), "yyyy-MM-dd")
+        : ""
 
     // Mock employee data fetching
-    const fetchEmployeeDetails = async () => {
+    const fetchEmployeeList = async () => {
         setLoading1(true)
 
-        // simulate an API call
-        setTimeout(() => {
-            // Dummy data (replace with API call)
-            const fetchedData: EmployeeInfo = {
-                name: "John Doe",
-                postingPlace: "Head Office",
-                designation: "Software Engineer",
-                department: "IT Department",
-                joiningDate: "2022-05-15",
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/employees/list`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    employeeId: employeeId
+                }),
             }
+        );
 
-            setEmployee(fetchedData)
+        const responseData = await response.json();
+        if (responseData.status === 'success') {
+            setEmployee(responseData.data)
             setLoading1(false)
-        }, 1000)
+            // toast.success(responseData?.message);
+        } else {
+            toast.error(responseData.message);
+        }
     }
 
     // Mock employee data fetching
@@ -92,7 +103,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                 value={employeeId}
                                 onChange={(e) => setEmployeeId(e.target.value)}
                             />
-                            <Button variant="default" onClick={fetchEmployeeDetails} disabled={loading1 || !employeeId}>
+                            <Button variant="default" onClick={fetchEmployeeList} disabled={loading1 || !employeeId}>
                                 {loading1 ?
                                     <>
                                         <Spinner />
@@ -109,25 +120,34 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
 
                     <div>
                         <Label>Employee Name</Label>
-                        <Input id="name" value={employee?.name ?? ""} readOnly />
+                        <Input id="full_name" value={employee?.full_name ?? ""} readOnly />
                     </div>
                     <div>
                         <Label>Posting Place</Label>
-                        <Input id="postingPlace" value={employee?.postingPlace ?? ""} readOnly />
+                        <Input id="place_name" value={employee?.place_name ?? ""} readOnly />
                     </div>
                     <div>
-                        <Label htmlFor="designation">Designation</Label>
-                        <Input id="designation" value={employee?.designation ?? ""} readOnly />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="department">Department</Label>
-                        <Input id="department" value={employee?.department ?? ""} readOnly />
+                        <Label htmlFor="designation_name">Designation</Label>
+                        <Input id="designation_name" value={employee?.designation_name ?? ""} readOnly />
                     </div>
 
                     <div>
-                        <Label htmlFor="joiningDate">Joining Date</Label>
-                        <Input id="joiningDate" value={employee?.joiningDate ?? ""} readOnly />
+                        <Label htmlFor="department_name">Department</Label>
+                        <Input id="department_name" value={employee?.department_name ?? ""} readOnly />
+                    </div>
+
+                    <div>
+                        <Label htmlFor="joining_date">Joining Date</Label>
+                        <Input
+                            id="joining_date"
+                            value={
+                                employee?.joining_date
+                                    ? format(new Date(employee.joining_date), "yyyy-MM-dd")
+                                    : ""
+                            }
+                            readOnly
+                        />
+
                     </div>
                 </div>
 
@@ -136,7 +156,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                         <h1 className="text-[16px] font-bold">Salary Group</h1>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4 border">
                             <div>
-                                <Label htmlFor="salaryEDate">Salary E-Date</Label>
+                                <Label htmlFor="salaryEDate">Salary Effective Date</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button
@@ -158,7 +178,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                 </Popover>
                             </div>
                             <div className="">
-                                <Label>PF Date</Label>
+                                <Label>Provident Fund Date</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button
@@ -180,6 +200,10 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                 </Popover>
                             </div>
                         </div>
+                        <div>
+                            <Label htmlFor="salaryGrout">Salary Group</Label>
+                            {/* <Input id="salaryGrout" value={employee?.salaryGrout ?? ""} readOnly /> */}
+                        </div>
 
                     </div>
                     <div className="w-full lg:w-1/2">
@@ -188,13 +212,13 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
                                     <Label>Pay Mode</Label>
-                                    <Input id="joiningDate" value={employee?.joiningDate ?? ""} readOnly />
+                                    <Input id="joining_date" value={employee?.joining_date ?? ""} readOnly />
                                 </div>
                                 <div>
                                     <Label>Bank</Label>
                                     <div className="flex gap-2">
                                         <Input className="w-1/3" id="shortName" value={bankInfo?.shortName ?? ""} readOnly />
-                                        <Input className="w-2/3" id="fullName" value={bankInfo?.fullname ?? ""} readOnly />
+                                        <Input className="w-2/3" id="full_name" value={bankInfo?.fullname ?? ""} readOnly />
                                     </div>
                                 </div>
                             </div>
