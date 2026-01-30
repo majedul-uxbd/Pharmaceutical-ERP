@@ -24,8 +24,9 @@ interface EmployeeList {
 }
 
 interface BankInfo {
-    shortName: string
-    fullname: string
+    id: number,
+    short_name: string
+    bank_name: string
 }
 
 const SalaryStructure = ({ session }: SalaryStructureProps) => {
@@ -74,17 +75,31 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
     const fetchBankAccountDetails = async () => {
         setLoading2(true)
 
-        // simulate an API call
-        setTimeout(() => {
-            // Dummy data (replace with API call)
-            const fetchedData: BankInfo = {
-                shortName: "IBL",
-                fullname: "Islamic Bank PLC"
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/common/bank-info`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    accountNo: accountNo
+                }),
             }
-
-            setBankInfo(fetchedData)
+        );
+        const responseData = await response.json();
+        console.log('🚀 ----------------------------------------------------------------🚀');
+        console.log('🚀 ~ :92 ~ fetchBankAccountDetails ~ responseData:', responseData);
+        console.log('🚀 ----------------------------------------------------------------🚀');
+        if (responseData.status === 'success') {
+            setBankInfo(responseData.data)
             setLoading2(false)
-        }, 1000)
+        } else {
+            setLoading2(false)
+
+            toast.error(responseData.message);
+        }
     }
 
     return (
@@ -96,7 +111,7 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div className="flex flex-col">
                         <Label htmlFor="employeeId">Employee ID</Label>
-                        <div className="min-w-[200px] flex gap-2 mt-3">
+                        <div className="min-w-50 flex gap-2 mt-3">
                             <Input
                                 id="employeeId"
                                 placeholder="Employee ID"
@@ -147,7 +162,6 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                             }
                             readOnly
                         />
-
                     </div>
                 </div>
 
@@ -202,12 +216,12 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                         </div>
                         <div>
                             <Label htmlFor="salaryGrout">Salary Group</Label>
-                            {/* <Input id="salaryGrout" value={employee?.salaryGrout ?? ""} readOnly /> */}
+                            <Input id="salaryGrout" value="" readOnly />
                         </div>
 
                     </div>
                     <div className="w-full lg:w-1/2">
-                        <h1 className="text-[16px] font-bold">Payment Details</h1>
+                        <h1 className="text-[16px] font-bold">Account Details</h1>
                         <div className="p-4 border">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
@@ -217,8 +231,8 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                 <div>
                                     <Label>Bank</Label>
                                     <div className="flex gap-2">
-                                        <Input className="w-1/3" id="shortName" value={bankInfo?.shortName ?? ""} readOnly />
-                                        <Input className="w-2/3" id="full_name" value={bankInfo?.fullname ?? ""} readOnly />
+                                        <Input className="w-1/3" id="short_name" value={bankInfo?.short_name ?? ""} readOnly />
+                                        <Input className="w-2/3" id="full_name" value={bankInfo?.bank_name ?? ""} readOnly />
                                     </div>
                                 </div>
                             </div>
@@ -248,6 +262,10 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
 
                         </div>
                     </div>
+                </div>
+
+                <div className="w-full gap-2 flex flex-col md:flex-row mt-4">
+
                 </div>
             </CardContent>
         </Card>

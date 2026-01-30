@@ -534,7 +534,7 @@ const EmployeesTable = (session: EmployeesTableProps) => {
 
     const employeeTableData = async (paginationData: any) => {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/employees/get-employees-data`,
+            `${process.env.NEXT_PUBLIC_API_URL}/employees/table-data`,
             {
                 method: 'POST',
                 headers: {
