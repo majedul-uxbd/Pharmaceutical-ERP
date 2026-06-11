@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
-import { useState } from "react"
-import { ArrowRight, CalendarIcon } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ArrowRight, CalendarIcon, Plus, Trash } from "lucide-react"
 import { Spinner } from "../ui/spinner"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { format } from "date-fns"
 import { Calendar } from "../ui/calendar"
 import { toast } from "sonner"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+
 interface SalaryStructureProps {
     session: any
 }
@@ -42,6 +44,162 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
     const formattedJoiningDate = employee?.joining_date
         ? format(new Date(employee.joining_date), "yyyy-MM-dd")
         : ""
+    const [breakupOptions, setBreakupOptions] = useState<any[]>([])
+    const [deductionOptions, setDeductionOptions] = useState<any[]>([])
+    const [salaryGroups, setSalaryGroups] = useState<any[]>([])
+    const [salaryHeads, setSalaryHeads] = useState<any[]>([])
+    const [selectedSalaryGroup, setSelectedSalaryGroup] = useState<string>("")
+    const [selectedSalaryHead, setSelectedSalaryHead] = useState<string>("")
+    const [paymentDetails, setPaymentDetails] = useState<Array<{ breakupId: string; amount: string }>>([
+        { breakupId: "", amount: "" }
+    ])
+    const [deductionDetails, setDeductionDetails] = useState<Array<{ deductionId: string; amount: string }>>([
+        { deductionId: "", amount: "" }
+    ])
+
+    useEffect(() => {
+        if (!accessToken) return;
+        const fetchBreakupOptions = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/breakup/breakup-list`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                const responseData = await response.json();
+                if (responseData.status === 'success') {
+                    setBreakupOptions(responseData.data)
+                }
+            } catch (error) {
+                console.error("Failed to fetch breakup options", error);
+            }
+        };
+
+        const fetchDeductionOptions = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/deduction/deduction-list`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                const responseData = await response.json();
+                if (responseData.status === 'success') {
+                    setDeductionOptions(responseData.data)
+                }
+            } catch (error) {
+                console.error("Failed to fetch deduction options", error);
+            }
+        };
+
+        const fetchSalaryGroups = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/common/salary-group`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                const responseData = await response.json();
+                if (responseData.status === 'success') {
+                    setSalaryGroups(responseData.data)
+                }
+            } catch (error) {
+                console.error("Failed to fetch salary groups", error);
+            }
+        };
+
+        const fetchSalaryHeads = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/common/salary-head`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                const responseData = await response.json();
+                if (responseData.status === 'success') {
+                    setSalaryHeads(responseData.data)
+                }
+            } catch (error) {
+                console.error("Failed to fetch salary heads", error);
+            }
+        };
+
+        fetchBreakupOptions();
+        fetchDeductionOptions();
+        fetchSalaryGroups();
+        fetchSalaryHeads();
+    }, [accessToken]);
+
+    const handlePaymentChange = (index: number, field: 'breakupId' | 'amount', value: string) => {
+        const updated = [...paymentDetails];
+        updated[index] = { ...updated[index], [field]: value };
+        setPaymentDetails(updated);
+    }
+
+    const addPaymentRow = () => {
+        setPaymentDetails([...paymentDetails, { breakupId: "", amount: "" }]);
+    }
+
+    const removePaymentRow = (index: number) => {
+        if (paymentDetails.length > 1) {
+            const updated = paymentDetails.filter((_, i) => i !== index);
+            setPaymentDetails(updated);
+        }
+    }
+
+    const handlePaymentKeyDown = (e: React.KeyboardEvent, index: number) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (index === paymentDetails.length - 1) {
+                addPaymentRow();
+            }
+        }
+    }
+
+    const handleDeductionChange = (index: number, field: 'deductionId' | 'amount', value: string) => {
+        const updated = [...deductionDetails];
+        updated[index] = { ...updated[index], [field]: value };
+        setDeductionDetails(updated);
+    }
+
+    const addDeductionRow = () => {
+        setDeductionDetails([...deductionDetails, { deductionId: "", amount: "" }]);
+    }
+
+    const removeDeductionRow = (index: number) => {
+        if (deductionDetails.length > 1) {
+            const updated = deductionDetails.filter((_, i) => i !== index);
+            setDeductionDetails(updated);
+        }
+    }
+
+    const handleDeductionKeyDown = (e: React.KeyboardEvent, index: number) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (index === deductionDetails.length - 1) {
+                addDeductionRow();
+            }
+        }
+    }
 
     // Mock employee data fetching
     const fetchEmployeeList = async () => {
@@ -89,9 +247,6 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
             }
         );
         const responseData = await response.json();
-        console.log('🚀 ----------------------------------------------------------------🚀');
-        console.log('🚀 ~ :92 ~ fetchBankAccountDetails ~ responseData:', responseData);
-        console.log('🚀 ----------------------------------------------------------------🚀');
         if (responseData.status === 'success') {
             setBankInfo(responseData.data)
             setLoading2(false)
@@ -213,10 +368,50 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="salaryGrout">Salary Group</Label>
-                            <Input id="salaryGrout" value="" readOnly />
+                            <div>
+                                <Label htmlFor="salaryGroup">Salary Group</Label>
+                                <Select
+                                    value={selectedSalaryGroup}
+                                    onValueChange={setSelectedSalaryGroup}
+                                >
+                                    <SelectTrigger className="w-full mt-1 transition-all duration-200 focus:ring-2 focus:ring-primary/20">
+                                        <SelectValue placeholder="Select Salary Group" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {salaryGroups.map((g: any) => {
+                                            const gId = g.id !== undefined ? g.id : g['id '];
+                                            const val = g.group_id || String(gId);
+                                            return (
+                                                <SelectItem key={gId} value={val}>
+                                                    {g.name}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label htmlFor="salaryHead">Salary Head</Label>
+                                <Select
+                                    value={selectedSalaryHead}
+                                    onValueChange={setSelectedSalaryHead}
+                                >
+                                    <SelectTrigger className="w-full mt-1 transition-all duration-200 focus:ring-2 focus:ring-primary/20">
+                                        <SelectValue placeholder="Select Salary Head" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {salaryHeads.map((h: any) => {
+                                            const hId = h.id !== undefined ? h.id : h['id '];
+                                            const val = h.head_id || String(hId);
+                                            return (
+                                                <SelectItem key={hId} value={val}>
+                                                    {h.name}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
                     </div>
@@ -264,8 +459,146 @@ const SalaryStructure = ({ session }: SalaryStructureProps) => {
                     </div>
                 </div>
 
-                <div className="w-full gap-2 flex flex-col md:flex-row mt-4">
+                <div className="w-full gap-4 flex flex-col lg:flex-row mt-4">
+                    {/* Payment Details */}
+                    <div className="w-full lg:w-1/2 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="font-bold text-[16px]">Payment Details</h1>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={addPaymentRow}
+                                className="h-8 px-2 text-xs gap-1 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                            >
+                                <Plus className="w-3.5 h-3.5" /> Add Row
+                            </Button>
+                        </div>
+                        <div className="space-y-3 p-4 border rounded-xl bg-card shadow-sm">
+                            <div className="grid grid-cols-12 gap-3 font-semibold text-xs text-muted-foreground pb-2 border-b">
+                                <div className="col-span-6">Breakup Element</div>
+                                <div className="col-span-5">Amount</div>
+                                <div className="col-span-1"></div>
+                            </div>
+                            {paymentDetails.map((row, index) => (
+                                <div key={index} className="grid grid-cols-12 gap-3 items-center group animate-in fade-in-50 duration-200">
+                                    <div className="col-span-6">
+                                        <Select
+                                            value={row.breakupId}
+                                            onValueChange={(val) => handlePaymentChange(index, 'breakupId', val)}
+                                        >
+                                            <SelectTrigger className="w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20">
+                                                <SelectValue placeholder="Select Breakup" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {breakupOptions.map((opt: any) => {
+                                                    const optId = opt.id !== undefined ? opt.id : opt['id '];
+                                                    const val = opt.breakup_id || String(optId);
+                                                    return (
+                                                        <SelectItem key={optId} value={val}>
+                                                            {opt.breakup_name}
+                                                        </SelectItem>
+                                                    );
+                                                })}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="col-span-5">
+                                        <Input
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={row.amount}
+                                            onChange={(e) => handlePaymentChange(index, 'amount', e.target.value)}
+                                            onKeyDown={(e) => handlePaymentKeyDown(e, index)}
+                                            className="w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        />
+                                    </div>
+                                    <div className="col-span-1 flex justify-center">
+                                        {paymentDetails.length > 1 && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 rounded-full opacity-50 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => removePaymentRow(index)}
+                                            >
+                                                <Trash className="w-3.5 h-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
+                    {/* Deduction Details */}
+                    <div className="w-full lg:w-1/2 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="font-bold text-[16px]">Deduction Details</h1>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={addDeductionRow}
+                                className="h-8 px-2 text-xs gap-1 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                            >
+                                <Plus className="w-3.5 h-3.5" /> Add Row
+                            </Button>
+                        </div>
+                        <div className="space-y-3 p-4 border rounded-xl bg-card shadow-sm">
+                            <div className="grid grid-cols-12 gap-3 font-semibold text-xs text-muted-foreground pb-2 border-b">
+                                <div className="col-span-6">Deduction Element</div>
+                                <div className="col-span-5">Amount</div>
+                                <div className="col-span-1"></div>
+                            </div>
+                            {deductionDetails.map((row, index) => (
+                                <div key={index} className="grid grid-cols-12 gap-3 items-center group animate-in fade-in-50 duration-200">
+                                    <div className="col-span-6">
+                                        <Select
+                                            value={row.deductionId}
+                                            onValueChange={(val) => handleDeductionChange(index, 'deductionId', val)}
+                                        >
+                                            <SelectTrigger className="w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20">
+                                                <SelectValue placeholder="Select Deduction" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {deductionOptions.map((opt: any) => {
+                                                    const optId = opt.id !== undefined ? opt.id : opt['id '];
+                                                    const val = opt.deduction_id || String(optId);
+                                                    return (
+                                                        <SelectItem key={optId} value={val}>
+                                                            {opt.deduction_name}
+                                                        </SelectItem>
+                                                    );
+                                                })}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="col-span-5">
+                                        <Input
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={row.amount}
+                                            onChange={(e) => handleDeductionChange(index, 'amount', e.target.value)}
+                                            onKeyDown={(e) => handleDeductionKeyDown(e, index)}
+                                            className="w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        />
+                                    </div>
+                                    <div className="col-span-1 flex justify-center">
+                                        {deductionDetails.length > 1 && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 rounded-full opacity-50 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => removeDeductionRow(index)}
+                                            >
+                                                <Trash className="w-3.5 h-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </CardContent>
         </Card>
